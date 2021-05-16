@@ -5,7 +5,9 @@ project(vrender)
 set(CMAKE_CXX_STANDARD 17)
 set(BINARY_NAME vrender)
 
-include_directories(${PROJECT_SOURCE_DIR}/third_party)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+add_subdirectory(third_party)
 
 if(UNIX)
     find_package(PkgConfig REQUIRED)
