@@ -1,5 +1,6 @@
 #include "vpipeline.h"
-#include <vulkan/vulkan_core.h>
+
+#include "core/vvertex_buffer.h"
 
 VPipeline::VPipeline(const VDevice& device, const VSwapChain& swapChain) : m_Device(device), m_SwapChain(swapChain), m_Shader(device, "../shader_bin/vert.spv", "../shader_bin/frag.spv")
                                                                             
@@ -35,12 +36,15 @@ bool VPipeline::createGraphicsPipeline()
 
     VkPipelineShaderStageCreateInfo shaderStages[] = {vertStageCreateInfo, fragStageCreateInfo};
 
+    auto bindingDescription = Vertex::getBindingDescription();
+    auto attributeDescriptions = Vertex::getAttributeDescription();
+
     VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vertexInputInfo.vertexAttributeDescriptionCount = 0;
-    vertexInputInfo.pVertexAttributeDescriptions = nullptr;
-    vertexInputInfo.vertexBindingDescriptionCount = 0;
-    vertexInputInfo.pVertexBindingDescriptions = nullptr;
+    vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+    vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
+    vertexInputInfo.vertexBindingDescriptionCount = 1;
+    vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
 
     VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo = {};
     inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;

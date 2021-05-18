@@ -2,6 +2,7 @@
 
 #include "core/vdevice.h"
 #include "glm/glm.hpp"
+#include <array>
 
 struct Vertex
 {
@@ -15,6 +16,19 @@ struct Vertex
         bindingDescription.binding = 0;
         return bindingDescription;
     }
+
+    // TODO: Only 1 element for now, expand when adding texcoord, normal etc
+    static std::array<VkVertexInputAttributeDescription, 1> getAttributeDescription()
+    {
+        std::array<VkVertexInputAttributeDescription, 1> attributeDescriptions = {};
+        
+        attributeDescriptions[0].location = 0;
+        attributeDescriptions[0].binding = 0;
+        attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributeDescriptions[0].offset = offsetof(Vertex, position);
+
+        return attributeDescriptions;
+    }
 };
 
 class VVertexBuffer
@@ -27,12 +41,17 @@ public:
     VVertexBuffer(const VVertexBuffer&) = delete;
     VVertexBuffer& operator=(const VVertexBuffer&) = delete;
 
+    inline const VkBuffer& buffer() const { return m_Buffer; }
+    inline const std::vector<Vertex>& vertices() const { return m_Vertices; }
+
 private:
-    void init();
+    bool init();
+    bool findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags flags, uint32_t& typeIndex);
 
     const VDevice& m_Device;
 
     VkBuffer m_Buffer;
+    VkDeviceMemory m_Memory;
 
     const std::vector<Vertex>& m_Vertices;
 };

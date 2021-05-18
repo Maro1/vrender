@@ -38,6 +38,7 @@ public:
     inline const VkSurfaceKHR& surface() const { return m_Surface; }
     inline const VQueueFamilyIndices queueFamilyIndices() { return getQueueFamilies(m_PhysicalDevice); }
     inline const VkDevice& device() const { return m_Device; }
+    inline const VkPhysicalDevice& physicalDevice() const { return m_PhysicalDevice; }
     inline const VkCommandPool& commandPool() const { return m_CommandPool; }
     inline const VkQueue& graphicsQueue() const { return m_GraphicsQueue; }
     

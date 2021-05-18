@@ -5,11 +5,15 @@ VRenderer::VRenderer(const VDevice& device, VSwapChain& swapChain, VWindow& wind
       m_SwapChain(swapChain),
       m_Window(window)
 {
+    m_VertexBuffers.push_back(new VVertexBuffer(m_Device, vertices));
     init();
 }
 
 VRenderer::~VRenderer()
 {
+    for (auto buffer : m_VertexBuffers) {
+        delete buffer;
+    }
 
 }
 
@@ -108,6 +112,11 @@ VkResult VRenderer::createCommandBuffers()
 
 void VRenderer::draw(const VkCommandBuffer& commandBuffer)
 {
-    vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+
+    VkBuffer vertexBuffers[] = {m_VertexBuffers[0]->buffer()};
+    VkDeviceSize offsets[] = {0};
+
+    vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+    vkCmdDraw(commandBuffer, static_cast<uint32_t>(m_VertexBuffers[0]->vertices().size()), 1, 0, 0);
 }
 

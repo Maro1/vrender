@@ -2,6 +2,7 @@
 
 #include "core/vshader.h"
 #include "core/vswap_chain.h"
+#include "core/vvertex_buffer.h"
 
 class VPipeline
 {

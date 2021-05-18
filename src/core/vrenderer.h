@@ -24,18 +24,27 @@ public:
 
 private:
 
-   void init();
+    void init();
 
-   VkResult createCommandBuffers();
+    VkResult createCommandBuffers();
+     
+    const VDevice& m_Device;
+    VSwapChain& m_SwapChain;
+    VWindow& m_Window;
+
+    std::vector<VkFence> m_InFlightFences;
+    std::vector<VkCommandBuffer> m_CommandBuffers;
+    uint32_t m_CurrentFrame = 0;
+    uint32_t m_CurrentImage;
+
+    std::vector<VVertexBuffer*> m_VertexBuffers;
+
+    std::vector<VkSemaphore> m_RenderFinishedSemaphores;
+
+    const std::vector<Vertex> vertices = {
+         {.position = glm::vec3(0.0f, -0.5f, 0.0f)},
+         {.position = glm::vec3(0.5f, 0.5f, 0.0f)},
+         {.position = glm::vec3(-0.5f, 0.5f, 0.0f)}
+    };
     
-   const VDevice& m_Device;
-   VSwapChain& m_SwapChain;
-   VWindow& m_Window;
-
-   std::vector<VkFence> m_InFlightFences;
-   std::vector<VkCommandBuffer> m_CommandBuffers;
-   uint32_t m_CurrentFrame = 0;
-   uint32_t m_CurrentImage;
-
-   std::vector<VkSemaphore> m_RenderFinishedSemaphores;
-};
+}; 
