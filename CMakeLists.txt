@@ -61,3 +61,36 @@ target_link_libraries(${BINARY_NAME} spdlog)
 target_link_libraries(${BINARY_NAME} glfw)
 target_link_libraries(${BINARY_NAME} vulkan)
 
+# Compile shaders
+find_program(GLSLC glslc)
+
+file(GLOB_RECURSE GLSL_SOURCE_FILES
+    "src/shaders/*.frag"
+    "src/shaders/*.vert"
+    )
+
+foreach(GLSL ${GLSL_SOURCE_FILES})
+  get_filename_component(FILE_NAME ${GLSL} NAME)
+  set(SPIRV "shader_bin/${FILE_NAME}.spv")
+  add_custom_command(
+    OUTPUT ${SPIRV}
+    COMMAND ${CMAKE_COMMAND} -E make_directory "shader_bin/"
+    COMMAND ${GLSLC} ${GLSL} -o ${SPIRV}
+    DEPENDS ${GLSLC})
+  list(APPEND SPIRV_BINARY_FILES ${SPIRV})
+endforeach(GLSL)
+
+add_custom_target(
+    Shaders 
+    DEPENDS ${SPIRV_BINARY_FILES}
+    )
+
+add_dependencies(vrender Shaders)
+
+add_custom_command(TARGET vrender POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:vrender>/shader_bin"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "shader_bin"
+        "$<TARGET_FILE_DIR:vrender>/shader_bin"
+        )
+

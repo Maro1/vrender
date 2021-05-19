@@ -1,6 +1,6 @@
 #include "vpipeline.h"
 
-#include "core/vvertex_buffer.h"
+#include "core/vbuffer.h"
 
 VPipeline::VPipeline(const VDevice& device, const VSwapChain& swapChain) : m_Device(device), m_SwapChain(swapChain), m_Shader(device, "../shader_bin/vert.spv", "../shader_bin/frag.spv")
                                                                             

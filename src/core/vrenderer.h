@@ -3,6 +3,7 @@
 #include "core/vdevice.h"
 #include "core/vswap_chain.h"
 #include "core/vpipeline.h"
+#include "core/vbuffer.h"
 
 #include <vector>
 
@@ -42,9 +43,14 @@ private:
     std::vector<VkSemaphore> m_RenderFinishedSemaphores;
 
     const std::vector<Vertex> vertices = {
-         {.position = glm::vec3(0.0f, -0.5f, 0.0f)},
+         {.position = glm::vec3(-0.5f, -0.5f, 0.0f)},
+         {.position = glm::vec3(0.5f, -0.5f, 0.0f)},
          {.position = glm::vec3(0.5f, 0.5f, 0.0f)},
-         {.position = glm::vec3(-0.5f, 0.5f, 0.0f)}
+         {.position = glm::vec3(-0.5f, 0.5f, 0.0f)},
+    };
+
+    const std::vector<uint16_t> indices = {
+        0, 1, 2, 2, 3, 0 
     };
     
 }; 
