@@ -84,7 +84,7 @@ void VRenderer::beginRenderPass()
     viewport.x = 0.0f;
     viewport.y = 0.0f;
     viewport.width = static_cast<float>(m_SwapChain.extent().width);
-    viewport.height = static_cast<float>(m_SwapChain.extent().width);
+    viewport.height = static_cast<float>(m_SwapChain.extent().height);
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
     VkRect2D scissor{{0, 0}, m_SwapChain.extent()};

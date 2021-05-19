@@ -16,6 +16,7 @@ int VRender::run()
     V_LOG_LEVEL(V_LOG_LEVEL_DEBUG);
     V_LOG_INFO("Started VRender application.");
     while (!m_Window.shouldClose()) {
+        glfwPollEvents();
         VkCommandBuffer commandBuffer = m_Renderer.beginFrame();
         m_Renderer.beginRenderPass();
         m_Pipeline.bind(commandBuffer);

@@ -18,7 +18,7 @@ public:
 private:
     VShader m_Shader;
     const VDevice& m_Device;
-    const VSwapChain m_SwapChain;
+    const VSwapChain& m_SwapChain;
 
     VkPipeline m_Pipeline;
     VkPipelineLayout m_Layout;

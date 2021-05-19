@@ -83,7 +83,6 @@ bool VPipeline::createGraphicsPipeline()
     rasterizerInfo.depthBiasClamp = 0.0f;
     rasterizerInfo.depthBiasSlopeFactor = 0.0f;
 
-
     VkPipelineMultisampleStateCreateInfo multisampling{};
     multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
     multisampling.sampleShadingEnable = VK_FALSE;
