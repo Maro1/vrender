@@ -9,7 +9,7 @@ class VSwapChain
 {
 public:
 
-    VSwapChain(VWindow& window, VDevice& device) : m_Window(window), m_Device(device) { init(); };
+    VSwapChain(VDevice* device, VWindow* window) : m_Window(window), m_Device(device) { init(); };
     ~VSwapChain();
 
     void recreate();
@@ -41,8 +41,8 @@ private:
     bool createSyncObjects();
     void createFramebuffers();
 
-    VWindow& m_Window;
-    VDevice& m_Device;
+    VWindow* m_Window;
+    VDevice* m_Device;
 
     VkSwapchainKHR m_SwapChain;
     VkSurfaceFormatKHR m_Format;

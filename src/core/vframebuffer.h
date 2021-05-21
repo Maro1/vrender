@@ -7,7 +7,7 @@ class VFramebuffer
 public:
 
     VFramebuffer(
-            const VDevice& device, 
+            VDevice* device, 
             const VkRenderPass& renderPass,
             uint32_t width,
             uint32_t height,
@@ -22,7 +22,7 @@ public:
 
 private:
 
-    const VDevice& m_Device;
+    VDevice* m_Device;
 
     VkFramebuffer m_Framebuffer;
 

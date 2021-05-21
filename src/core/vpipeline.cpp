@@ -2,19 +2,22 @@
 
 #include "core/vbuffer.h"
 
-VPipeline::VPipeline(const VDevice& device, const VSwapChain& swapChain) : m_Device(device), m_SwapChain(swapChain), m_Shader(device, "../shader_bin/vert.spv", "../shader_bin/frag.spv")
-                                                                            
+VPipeline::VPipeline(VDevice* device, VSwapChain* swapChain)
+    : m_Device(device), m_SwapChain(swapChain),
+      m_Shader(device, "shader_bin/triangle.vert.spv", "shader_bin/triangle.frag.spv")
 {
+    m_DescriptorSetAllocator = new VDescriptorSetAllocator(m_Device);
+    m_DescriptorSetLayout = m_DescriptorSetAllocator->layout();
     createGraphicsPipeline();
 }
 
 VPipeline::~VPipeline()
 {
-    vkDestroyPipeline(m_Device.device(), m_Pipeline, nullptr);
-    vkDestroyPipelineLayout(m_Device.device(), m_Layout, nullptr);
+    vkDestroyPipeline(m_Device->device(), m_Pipeline, nullptr);
+    vkDestroyPipelineLayout(m_Device->device(), m_Layout, nullptr);
 }
 
-void VPipeline::bind(const VkCommandBuffer &commandBuffer)
+void VPipeline::bind(const VkCommandBuffer& commandBuffer)
 {
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_Pipeline);
 }
@@ -54,14 +57,14 @@ bool VPipeline::createGraphicsPipeline()
     VkViewport viewport = {};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
-    viewport.width = (float) m_SwapChain.extent().width;
-    viewport.height = (float) m_SwapChain.extent().height;
+    viewport.width = (float)m_SwapChain->extent().width;
+    viewport.height = (float)m_SwapChain->extent().height;
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
 
     VkRect2D scissor = {};
     scissor.offset = {0, 0};
-    scissor.extent = m_SwapChain.extent();
+    scissor.extent = m_SwapChain->extent();
 
     VkPipelineViewportStateCreateInfo viewportStateInfo = {};
     viewportStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -77,7 +80,7 @@ bool VPipeline::createGraphicsPipeline()
     rasterizerInfo.polygonMode = VK_POLYGON_MODE_FILL;
     rasterizerInfo.lineWidth = 1.0f;
     rasterizerInfo.cullMode = VK_CULL_MODE_BACK_BIT;
-    rasterizerInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
+    rasterizerInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     rasterizerInfo.depthBiasEnable = VK_FALSE;
     rasterizerInfo.depthBiasConstantFactor = 0.0f;
     rasterizerInfo.depthBiasClamp = 0.0f;
@@ -87,41 +90,41 @@ bool VPipeline::createGraphicsPipeline()
     multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
     multisampling.sampleShadingEnable = VK_FALSE;
     multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-    multisampling.minSampleShading = 1.0f; 
-    multisampling.pSampleMask = nullptr; 
-    multisampling.alphaToCoverageEnable = VK_FALSE; 
-    multisampling.alphaToOneEnable = VK_FALSE; 
-    
-    
+    multisampling.minSampleShading = 1.0f;
+    multisampling.pSampleMask = nullptr;
+    multisampling.alphaToCoverageEnable = VK_FALSE;
+    multisampling.alphaToOneEnable = VK_FALSE;
+
     VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-    colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+    colorBlendAttachment.colorWriteMask =
+        VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
     colorBlendAttachment.blendEnable = VK_FALSE;
-    colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE; 
+    colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
     colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
-    colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD; 
-    colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE; 
+    colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+    colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
     colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-    colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD; 
+    colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
 
     VkPipelineColorBlendStateCreateInfo colorBlending{};
     colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
     colorBlending.logicOpEnable = VK_FALSE;
-    colorBlending.logicOp = VK_LOGIC_OP_COPY; 
+    colorBlending.logicOp = VK_LOGIC_OP_COPY;
     colorBlending.attachmentCount = 1;
     colorBlending.pAttachments = &colorBlendAttachment;
-    colorBlending.blendConstants[0] = 0.0f; 
+    colorBlending.blendConstants[0] = 0.0f;
     colorBlending.blendConstants[1] = 0.0f;
     colorBlending.blendConstants[2] = 0.0f;
     colorBlending.blendConstants[3] = 0.0f;
-    
+
     VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.pSetLayouts = nullptr;
-    pipelineLayoutInfo.setLayoutCount = 0;
+    pipelineLayoutInfo.pSetLayouts = &m_DescriptorSetLayout;
+    pipelineLayoutInfo.setLayoutCount = 1;
     pipelineLayoutInfo.pushConstantRangeCount = 0;
     pipelineLayoutInfo.pPushConstantRanges = nullptr;
 
-    VkResult layoutResult = vkCreatePipelineLayout(m_Device.device(), &pipelineLayoutInfo, nullptr, &m_Layout);
+    VkResult layoutResult = vkCreatePipelineLayout(m_Device->device(), &pipelineLayoutInfo, nullptr, &m_Layout);
 
     VkPipelineDynamicStateCreateInfo dynamicStateInfo = {};
     dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
@@ -143,13 +146,13 @@ bool VPipeline::createGraphicsPipeline()
 
     pipelineInfo.layout = m_Layout;
 
-    pipelineInfo.renderPass = m_SwapChain.renderPass();
+    pipelineInfo.renderPass = m_SwapChain->renderPass();
     pipelineInfo.subpass = 0;
 
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
     pipelineInfo.basePipelineIndex = -1;
-    
-    return vkCreateGraphicsPipelines(m_Device.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_Pipeline) == VK_SUCCESS;
-}
 
+    return vkCreateGraphicsPipelines(m_Device->device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_Pipeline) ==
+           VK_SUCCESS;
+}
 

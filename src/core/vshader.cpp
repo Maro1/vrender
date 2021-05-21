@@ -5,7 +5,7 @@
 #include <fstream>
 #include <type_traits>
 
-VShader::VShader(const VDevice& device, const std::string& vertexPath, const std::string& fragmentPath) : m_Device(device)
+VShader::VShader(VDevice* device, const std::string& vertexPath, const std::string& fragmentPath) : m_Device(device)
 {
     m_VertexData = VShader::readFile(vertexPath);
     m_FragmentData = VShader::readFile(fragmentPath);
@@ -15,8 +15,8 @@ VShader::VShader(const VDevice& device, const std::string& vertexPath, const std
 
 VShader::~VShader()
 {
-    vkDestroyShaderModule(m_Device.device(), m_VertModule, nullptr);
-    vkDestroyShaderModule(m_Device.device(), m_FragModule, nullptr);
+    vkDestroyShaderModule(m_Device->device(), m_VertModule, nullptr);
+    vkDestroyShaderModule(m_Device->device(), m_FragModule, nullptr);
 }
 
 std::vector<char> VShader::readFile(const std::string& filename) 
@@ -47,7 +47,7 @@ VkShaderModule VShader::createShaderModule(const std::vector<char>& code)
     createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
     VkShaderModule shaderModule;
-    if (vkCreateShaderModule(m_Device.device(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
+    if (vkCreateShaderModule(m_Device->device(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
         return VK_NULL_HANDLE;
     }
     return shaderModule;

@@ -1,6 +1,6 @@
 #include "vframebuffer.h"
 VFramebuffer::VFramebuffer(
-        const VDevice& device, 
+        VDevice* device, 
         const VkRenderPass& renderPass,
         uint32_t width,
         uint32_t height,
@@ -16,11 +16,11 @@ VFramebuffer::VFramebuffer(
     frambufferInfo.height = height;
     frambufferInfo.layers = 1;
 
-    vkCreateFramebuffer(m_Device.device(), &frambufferInfo, nullptr, &m_Framebuffer);
+    vkCreateFramebuffer(m_Device->device(), &frambufferInfo, nullptr, &m_Framebuffer);
 }
 
 VFramebuffer::~VFramebuffer()
 {
-    vkDestroyFramebuffer(m_Device.device(), m_Framebuffer, nullptr);
+    vkDestroyFramebuffer(m_Device->device(), m_Framebuffer, nullptr);
 }
 

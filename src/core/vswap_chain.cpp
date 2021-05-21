@@ -21,12 +21,12 @@ void VSwapChain::init()
 
 void VSwapChain::recreate()
 {
-    auto extent = m_Window.extent();
+    auto extent = m_Window->extent();
     while (extent.width == 0 || extent.height == 0) {
-        extent = m_Window.extent();
+        extent = m_Window->extent();
         glfwWaitEvents();
     }
-    vkDeviceWaitIdle(m_Device.device());
+    vkDeviceWaitIdle(m_Device->device());
 
     cleanup();
     
@@ -44,24 +44,24 @@ void VSwapChain::cleanup()
         delete framebuffer;
     }
     for (const VkImageView& imageView : m_SwapChainImageViews) {
-        vkDestroyImageView(m_Device.device(), imageView, nullptr);
+        vkDestroyImageView(m_Device->device(), imageView, nullptr);
     }
-    vkDestroySwapchainKHR(m_Device.device(), m_SwapChain, nullptr);
+    vkDestroySwapchainKHR(m_Device->device(), m_SwapChain, nullptr);
 
-    vkDestroyRenderPass(m_Device.device(), m_RenderPass, nullptr);
+    vkDestroyRenderPass(m_Device->device(), m_RenderPass, nullptr);
 
     for (unsigned int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        vkDestroySemaphore(m_Device.device(), m_ImageAvailableSemaphores[i], nullptr);
-        vkDestroySemaphore(m_Device.device(), m_RenderFinishedSemaphores[i], nullptr);
-        vkDestroyFence(m_Device.device(), m_InFlightFences[i], nullptr);
+        vkDestroySemaphore(m_Device->device(), m_ImageAvailableSemaphores[i], nullptr);
+        vkDestroySemaphore(m_Device->device(), m_RenderFinishedSemaphores[i], nullptr);
+        vkDestroyFence(m_Device->device(), m_InFlightFences[i], nullptr);
     }
 }
 
 VkResult VSwapChain::aquireNextImage(uint32_t& imageIndex)
 {
-    vkWaitForFences(m_Device.device(), 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
+    vkWaitForFences(m_Device->device(), 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
 
-    return vkAcquireNextImageKHR(m_Device.device(), m_SwapChain, UINT64_MAX,
+    return vkAcquireNextImageKHR(m_Device->device(), m_SwapChain, UINT64_MAX,
                 m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &imageIndex);
 }
 
@@ -80,13 +80,13 @@ bool VSwapChain::createSyncObjects()
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
     for (unsigned int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        if (vkCreateSemaphore(m_Device.device(), &semaphoreInfo, nullptr, &m_ImageAvailableSemaphores[i])
+        if (vkCreateSemaphore(m_Device->device(), &semaphoreInfo, nullptr, &m_ImageAvailableSemaphores[i])
                 != VK_SUCCESS)
             return false;
-        if (vkCreateSemaphore(m_Device.device(), &semaphoreInfo, nullptr, &m_RenderFinishedSemaphores[i])
+        if (vkCreateSemaphore(m_Device->device(), &semaphoreInfo, nullptr, &m_RenderFinishedSemaphores[i])
                 != VK_SUCCESS)
             return false;
-        if (vkCreateFence(m_Device.device(), &fenceInfo, nullptr, &m_InFlightFences[i])
+        if (vkCreateFence(m_Device->device(), &fenceInfo, nullptr, &m_InFlightFences[i])
                 != VK_SUCCESS)
             return false;
         }
@@ -96,7 +96,7 @@ bool VSwapChain::createSyncObjects()
 VkResult VSwapChain::submitCommandBuffers(const VkCommandBuffer* buffer, uint32_t imageIndex)
 {
     if (m_ImagesInFlight[imageIndex] != VK_NULL_HANDLE) 
-        vkWaitForFences(m_Device.device(), 1, &m_ImagesInFlight[m_CurrentFrame], VK_TRUE, UINT64_MAX);
+        vkWaitForFences(m_Device->device(), 1, &m_ImagesInFlight[m_CurrentFrame], VK_TRUE, UINT64_MAX);
 
     m_ImagesInFlight[imageIndex] = m_InFlightFences[m_CurrentFrame];
 
@@ -115,10 +115,10 @@ VkResult VSwapChain::submitCommandBuffers(const VkCommandBuffer* buffer, uint32_
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
-    vkResetFences(m_Device.device(), 1, &m_InFlightFences[m_CurrentFrame]);
+    vkResetFences(m_Device->device(), 1, &m_InFlightFences[m_CurrentFrame]);
 
     VkResult queueSubmitResult =
-        vkQueueSubmit(m_Device.graphicsQueue(), 1, &submitInfo, m_InFlightFences[m_CurrentFrame]);
+        vkQueueSubmit(m_Device->graphicsQueue(), 1, &submitInfo, m_InFlightFences[m_CurrentFrame]);
 
     if (queueSubmitResult != VK_SUCCESS)
         return queueSubmitResult;
@@ -134,7 +134,7 @@ VkResult VSwapChain::submitCommandBuffers(const VkCommandBuffer* buffer, uint32_
     presentInfo.pImageIndices = &imageIndex;
     presentInfo.pResults = nullptr;
 
-    VkResult queuePresentResult = vkQueuePresentKHR(m_Device.graphicsQueue(), &presentInfo);
+    VkResult queuePresentResult = vkQueuePresentKHR(m_Device->graphicsQueue(), &presentInfo);
 
     m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     return queuePresentResult;
@@ -165,8 +165,8 @@ VkExtent2D VSwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabili
         return capabilities.currentExtent;
     }
     VkExtent2D extent = {
-            static_cast<uint32_t>(m_Window.width()),
-            static_cast<uint32_t>(m_Window.height())
+            static_cast<uint32_t>(m_Window->width()),
+            static_cast<uint32_t>(m_Window->height())
             };
     
     extent.width = std::max(capabilities.minImageExtent.width, 
@@ -179,7 +179,7 @@ VkExtent2D VSwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabili
 
 VkResult VSwapChain::createSwapChain()
 {
-    VSwapChainSupportDetails supportDetails = m_Device.swapChainSupportDetails();
+    VSwapChainSupportDetails supportDetails = m_Device->swapChainSupportDetails();
 
     m_Format = chooseSurfaceFormat(supportDetails.formats);
     m_PresentMode = choosePresentMode(supportDetails.presentModes);
@@ -192,7 +192,7 @@ VkResult VSwapChain::createSwapChain()
 
     VkSwapchainCreateInfoKHR createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    createInfo.surface = m_Device.surface();
+    createInfo.surface = m_Device->surface();
 
     createInfo.minImageCount = imageCount;
     createInfo.imageFormat = m_Format.format;
@@ -202,7 +202,7 @@ VkResult VSwapChain::createSwapChain()
     createInfo.imageArrayLayers = 1;
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-    VQueueFamilyIndices indices = m_Device.queueFamilyIndices();
+    VQueueFamilyIndices indices = m_Device->queueFamilyIndices();
     uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
     if (indices.graphicsFamily != indices.presentFamily) {
         createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
@@ -219,12 +219,12 @@ VkResult VSwapChain::createSwapChain()
     createInfo.clipped = true;
     createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-    VkResult swapChainResult = vkCreateSwapchainKHR(m_Device.device(), &createInfo, nullptr, &m_SwapChain);
+    VkResult swapChainResult = vkCreateSwapchainKHR(m_Device->device(), &createInfo, nullptr, &m_SwapChain);
     if (swapChainResult != VK_SUCCESS) return swapChainResult;
 
-    vkGetSwapchainImagesKHR(m_Device.device(), m_SwapChain, &imageCount, nullptr);
+    vkGetSwapchainImagesKHR(m_Device->device(), m_SwapChain, &imageCount, nullptr);
     m_SwapChainImages.resize(imageCount);
-    return vkGetSwapchainImagesKHR(m_Device.device(), m_SwapChain, &imageCount, m_SwapChainImages.data());
+    return vkGetSwapchainImagesKHR(m_Device->device(), m_SwapChain, &imageCount, m_SwapChainImages.data());
 }
 
 VkResult VSwapChain::createImageViews()
@@ -250,7 +250,7 @@ VkResult VSwapChain::createImageViews()
         createInfo.subresourceRange.layerCount = 1;
         createInfo.subresourceRange.levelCount = 1;
 
-        VkResult result = vkCreateImageView(m_Device.device(), &createInfo, nullptr, &m_SwapChainImageViews[i]);
+        VkResult result = vkCreateImageView(m_Device->device(), &createInfo, nullptr, &m_SwapChainImageViews[i]);
         if (result != VK_SUCCESS) {
             return result;
         }
@@ -297,7 +297,7 @@ VkResult VSwapChain::createRenderPass()
     renderPassInfo.dependencyCount = 1;
     renderPassInfo.pDependencies = &dependency;
 
-    return vkCreateRenderPass(m_Device.device(), &renderPassInfo, nullptr, &m_RenderPass);
+    return vkCreateRenderPass(m_Device->device(), &renderPassInfo, nullptr, &m_RenderPass);
 }
 
 void VSwapChain::createFramebuffers()

@@ -9,7 +9,7 @@ class VShader
 {
 public:
 
-    VShader(const VDevice& device, const std::string& vertexPath, const std::string& fragmentPath);
+    VShader(VDevice* device, const std::string& vertexPath, const std::string& fragmentPath);
     ~VShader();
 
     VShader(const VShader&) = delete;
@@ -28,5 +28,5 @@ private:
 
     VkShaderModule m_VertModule;
     VkShaderModule m_FragModule;
-    const VDevice& m_Device;
+    VDevice* m_Device;
 };
