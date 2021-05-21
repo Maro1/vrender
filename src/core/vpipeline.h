@@ -7,7 +7,7 @@
 class VPipeline
 {
 public:
-    VPipeline(VDevice* device, VSwapChain* swapChain);
+    VPipeline(VDevice* device, VSwapChain* swapChain, VDescriptorSetAllocator* descriptorSetAllocator);
     ~VPipeline();
 
     VPipeline(const VPipeline&) = delete;

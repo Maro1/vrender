@@ -18,7 +18,7 @@ struct MVP
 class VRenderer
 {
 public:
-    VRenderer(VDevice* device, VSwapChain* swapChain, VWindow* window, VPipeline* pipeline);
+    VRenderer(VDevice* device, VSwapChain* swapChain, VWindow* window);
     ~VRenderer();
 
     VRenderer(const VRenderer&) = delete;
@@ -29,6 +29,11 @@ public:
     void beginRenderPass();
     void endRenderPass();
     void draw(const VkCommandBuffer& commandBuffer); // TODO: MOVE TO SCENE GRAPH
+
+    inline VPipeline& pipeline()
+    {
+        return m_Pipeline;
+    }
 
 private:
     void init();
@@ -41,8 +46,9 @@ private:
     VDevice* m_Device;
     VSwapChain* m_SwapChain;
     VWindow* m_Window;
-    VPipeline* m_Pipeline;
+
     VDescriptorPool m_DescriptorPool;
+    VPipeline m_Pipeline;
 
     std::vector<VkFence> m_InFlightFences;
     std::vector<VkCommandBuffer> m_CommandBuffers;

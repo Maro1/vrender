@@ -9,6 +9,7 @@ VDescriptorPool::VDescriptorPool(VDevice* device, unsigned int descriptorCount) 
 
 VDescriptorPool::~VDescriptorPool()
 {
+    delete m_Allocator;
     vkDestroyDescriptorPool(m_Device->device(), m_Pool, nullptr);
 }
 

@@ -18,6 +18,11 @@ public:
         return m_DescriptorSets;
     }
 
+    inline VDescriptorSetAllocator* allocator() const
+    {
+        return m_Allocator;
+    }
+
 private:
     VkResult createDescriptorPool(unsigned int descriptorCount);
 

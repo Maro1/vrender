@@ -6,9 +6,9 @@
 
 #include <chrono>
 
-VRenderer::VRenderer(VDevice* device, VSwapChain* swapChain, VWindow* window, VPipeline* pipeline)
+VRenderer::VRenderer(VDevice* device, VSwapChain* swapChain, VWindow* window)
     : m_Device(device), m_SwapChain(swapChain), m_Window(window), m_DescriptorPool(device, swapChain->images().size()),
-      m_Pipeline(pipeline)
+      m_Pipeline(device, swapChain, m_DescriptorPool.allocator())
 {
     m_VertexBuffers.push_back(new VVertexBuffer(m_Device, &vertices, &indices));
     createMVPBuffers();
@@ -127,7 +127,7 @@ VkResult VRenderer::createCommandBuffers()
 void VRenderer::draw(const VkCommandBuffer& commandBuffer)
 {
     m_VertexBuffers[0]->bind(commandBuffer);
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_Pipeline->layout(), 0, 1,
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_Pipeline.layout(), 0, 1,
                             &m_DescriptorPool.descriptorSets()[m_CurrentFrame], 0, nullptr);
     vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(m_VertexBuffers[0]->indices()->size()), 1, 0, 0, 0);
 }

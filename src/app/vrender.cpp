@@ -4,7 +4,7 @@
 
 VRender::VRender()
     : m_Window(m_AppInfo.title), m_Device(m_AppInfo, m_Window), m_SwapChain(&m_Device, &m_Window),
-      m_Pipeline(&m_Device, &m_SwapChain), m_Renderer(&m_Device, &m_SwapChain, &m_Window, &m_Pipeline)
+      m_Renderer(&m_Device, &m_SwapChain, &m_Window)
 {
 }
 
@@ -21,7 +21,7 @@ int VRender::run()
         glfwPollEvents();
         VkCommandBuffer commandBuffer = m_Renderer.beginFrame();
         m_Renderer.beginRenderPass();
-        m_Pipeline.bind(commandBuffer);
+        m_Renderer.pipeline().bind(commandBuffer);
         m_Renderer.draw(commandBuffer);
         m_Renderer.endRenderPass();
         m_Renderer.endFrame();

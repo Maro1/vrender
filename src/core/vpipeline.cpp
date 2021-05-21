@@ -2,11 +2,11 @@
 
 #include "core/vbuffer.h"
 
-VPipeline::VPipeline(VDevice* device, VSwapChain* swapChain)
+VPipeline::VPipeline(VDevice* device, VSwapChain* swapChain, VDescriptorSetAllocator* descriptorSetAllocator)
     : m_Device(device), m_SwapChain(swapChain),
       m_Shader(device, "shader_bin/triangle.vert.spv", "shader_bin/triangle.frag.spv")
 {
-    m_DescriptorSetAllocator = new VDescriptorSetAllocator(m_Device);
+    m_DescriptorSetAllocator = descriptorSetAllocator;
     m_DescriptorSetLayout = m_DescriptorSetAllocator->layout();
     createGraphicsPipeline();
 }

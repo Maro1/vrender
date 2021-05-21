@@ -25,10 +25,9 @@ public:
 
 private:
     const VAppInfo m_AppInfo = {"VRender", 1, 2};
-    
+
     VWindow m_Window;
     VDevice m_Device;
     VSwapChain m_SwapChain;
     VRenderer m_Renderer;
-    VPipeline m_Pipeline;
 };
