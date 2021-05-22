@@ -1,6 +1,6 @@
-#include "vwindow.h"
+#include "window.h"
 
-VWindow::VWindow(unsigned int width, unsigned int height, const std::string& title)
+Window::Window(unsigned int width, unsigned int height, const std::string& title)
     :
     m_Width(width),
     m_Height(height),
@@ -9,13 +9,13 @@ VWindow::VWindow(unsigned int width, unsigned int height, const std::string& tit
     init();
 }
 
-VWindow::~VWindow()
+Window::~Window()
 {
     glfwDestroyWindow(m_WindowInstance);
     glfwTerminate(); // TODO: Move this to app termination or something similar, shouldn't init/terminate glfw on every new window?
 }
 
-void VWindow::init()
+void Window::init()
 {
     // TODO: Move this to app init or something similar to avoid initializing multiple times
     if (!glfwInit()) {
@@ -28,7 +28,7 @@ void VWindow::init()
 
     m_WindowInstance = glfwCreateWindow(m_Width, m_Height, m_Title.c_str(), nullptr, nullptr);
     glfwSetWindowUserPointer(m_WindowInstance, this);
-    glfwSetFramebufferSizeCallback(m_WindowInstance, VWindow::framebufferSizeCallback);
+    glfwSetFramebufferSizeCallback(m_WindowInstance, Window::framebufferSizeCallback);
 
     if (!m_WindowInstance) {
         // TODO: Replace with proper error/logging system
@@ -36,14 +36,14 @@ void VWindow::init()
     }
 }
 
-VkResult VWindow::createWindowSurface(VkInstance instance, VkSurfaceKHR* surface) const
+VkResult Window::createWindowSurface(VkInstance instance, VkSurfaceKHR* surface) const
 {
     return glfwCreateWindowSurface(instance, m_WindowInstance, nullptr, surface);
 }
 
-void VWindow::framebufferSizeCallback(GLFWwindow *window, int width, int height)
+void Window::framebufferSizeCallback(GLFWwindow *window, int width, int height)
 {
-    VWindow* pWindow = reinterpret_cast<VWindow*>(glfwGetWindowUserPointer(window));
+    Window* pWindow = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
     pWindow->m_FramebufferResized = true;
     pWindow->m_Width = width;
     pWindow->m_Height = height;

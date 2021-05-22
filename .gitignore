@@ -1,0 +1,7 @@
+build/*
+.vscode
+.cache
+compile_commands.json
+compile.sh
+compile_shaders
+run.sh

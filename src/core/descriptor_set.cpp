@@ -1,19 +1,22 @@
-#include "vdescriptor_set.h"
+#include "descriptor_set.h"
 
-VDescriptorPool::VDescriptorPool(VDevice* device, unsigned int descriptorCount) : m_Device(device)
+namespace vrender
 {
-    m_Allocator = new VDescriptorSetAllocator(device);
+
+DescriptorPool::DescriptorPool(Device* device, unsigned int descriptorCount) : m_Device(device)
+{
+    m_Allocator = new DescriptorSetAllocator(device);
     createDescriptorPool(descriptorCount);
     m_DescriptorSets = m_Allocator->allocate(m_Pool, descriptorCount);
 }
 
-VDescriptorPool::~VDescriptorPool()
+DescriptorPool::~DescriptorPool()
 {
     delete m_Allocator;
     vkDestroyDescriptorPool(m_Device->device(), m_Pool, nullptr);
 }
 
-VkResult VDescriptorPool::createDescriptorPool(unsigned int descriptorCount)
+VkResult DescriptorPool::createDescriptorPool(unsigned int descriptorCount)
 {
     VkDescriptorPoolSize poolSize = {};
     poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -29,17 +32,17 @@ VkResult VDescriptorPool::createDescriptorPool(unsigned int descriptorCount)
 }
 
 // ----------- VDescriptorSetAllocator
-VDescriptorSetAllocator::VDescriptorSetAllocator(VDevice* device) : m_Device(device)
+DescriptorSetAllocator::DescriptorSetAllocator(Device* device) : m_Device(device)
 {
     createMVPLayout();
 }
 
-VDescriptorSetAllocator::~VDescriptorSetAllocator()
+DescriptorSetAllocator::~DescriptorSetAllocator()
 {
     vkDestroyDescriptorSetLayout(m_Device->device(), m_Layout, nullptr);
 }
 
-std::vector<VkDescriptorSet> VDescriptorSetAllocator::allocate(VkDescriptorPool pool, unsigned int count) const
+std::vector<VkDescriptorSet> DescriptorSetAllocator::allocate(VkDescriptorPool pool, unsigned int count) const
 {
     std::vector<VkDescriptorSet> descriptorSets;
     std::vector<VkDescriptorSetLayout> layouts(count, m_Layout);
@@ -55,7 +58,7 @@ std::vector<VkDescriptorSet> VDescriptorSetAllocator::allocate(VkDescriptorPool 
     return descriptorSets;
 }
 
-VkResult VDescriptorSetAllocator::createMVPLayout()
+VkResult DescriptorSetAllocator::createMVPLayout()
 {
     VkDescriptorSetLayoutBinding layoutBinding = {};
     layoutBinding.binding = 0;
@@ -71,4 +74,4 @@ VkResult VDescriptorSetAllocator::createMVPLayout()
 
     return vkCreateDescriptorSetLayout(m_Device->device(), &layoutInfo, nullptr, &m_Layout);
 }
-
+}; // namespace vrender

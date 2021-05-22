@@ -1,11 +1,13 @@
 #pragma once
 
-#include "app/vwindow.h"
-#include "core/vdevice.h"
-#include "core/vpipeline.h"
-#include "core/vrenderer.h"
+#include "app/window.h"
+#include "core/device.h"
+#include "core/pipeline.h"
+#include "core/renderer.h"
 
-struct VAppInfo
+namespace vrender
+{
+struct AppInfo
 {
     std::string title;
     uint32_t apiMajor;
@@ -24,10 +26,11 @@ public:
     int run();
 
 private:
-    const VAppInfo m_AppInfo = {"VRender", 1, 2};
+    const AppInfo m_AppInfo = {"VRender", 1, 2};
 
-    VWindow m_Window;
-    VDevice m_Device;
-    VSwapChain m_SwapChain;
-    VRenderer m_Renderer;
+    Window m_Window;
+    Device m_Device;
+    SwapChain m_SwapChain;
+    Renderer m_Renderer;
 };
+}; // namespace vrender

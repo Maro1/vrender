@@ -1,10 +1,10 @@
-#include "vframebuffer.h"
-VFramebuffer::VFramebuffer(
-        VDevice* device, 
-        const VkRenderPass& renderPass,
-        uint32_t width,
-        uint32_t height,
-        const std::vector<VkImageView>& attachments)
+#include "framebuffer.h"
+
+namespace vrender
+{
+
+Framebuffer::Framebuffer(Device* device, const VkRenderPass& renderPass, uint32_t width, uint32_t height,
+                         const std::vector<VkImageView>& attachments)
     : m_Device(device)
 {
     VkFramebufferCreateInfo frambufferInfo = {};
@@ -19,8 +19,8 @@ VFramebuffer::VFramebuffer(
     vkCreateFramebuffer(m_Device->device(), &frambufferInfo, nullptr, &m_Framebuffer);
 }
 
-VFramebuffer::~VFramebuffer()
+Framebuffer::~Framebuffer()
 {
     vkDestroyFramebuffer(m_Device->device(), m_Framebuffer, nullptr);
 }
-
+}; // namespace vrender

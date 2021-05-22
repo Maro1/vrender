@@ -1,12 +1,13 @@
 #include "app/vrender.h"
-#include "utils/vlog.h"
+#include "utils/log.h"
 
-int main() 
+int main()
 {
     V_LOG_LEVEL(V_LOG_LEVEL_DEBUG);
-    VRender vrender;
-    if (!vrender.run()) {
+    vrender::VRender vrender;
+    if (!vrender.run())
+    {
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
-}       
+}

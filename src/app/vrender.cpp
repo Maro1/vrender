@@ -1,16 +1,16 @@
 #include "vrender.h"
 
-#include "utils/vlog.h"
+#include "utils/log.h"
 
+namespace vrender
+{
 VRender::VRender()
     : m_Window(m_AppInfo.title), m_Device(m_AppInfo, m_Window), m_SwapChain(&m_Device, &m_Window),
       m_Renderer(&m_Device, &m_SwapChain, &m_Window)
 {
 }
 
-VRender::~VRender()
-{
-}
+VRender::~VRender() {}
 
 int VRender::run()
 {
@@ -29,4 +29,4 @@ int VRender::run()
     vkDeviceWaitIdle(m_Device.device());
     return 0;
 }
-
+}; // namespace vrender

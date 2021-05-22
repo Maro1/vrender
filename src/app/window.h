@@ -4,15 +4,15 @@
 #include "GLFW/glfw3.h"
 #include <string>
 
-class VWindow
+class Window
 {
 public:
-    VWindow(unsigned int width, unsigned int height, const std::string& title);
-    VWindow(const std::string& title) : VWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, title) {}
-    ~VWindow();
+    Window(unsigned int width, unsigned int height, const std::string& title);
+    Window(const std::string& title) : Window(DEFAULT_WIDTH, DEFAULT_HEIGHT, title) {}
+    ~Window();
 
-    VWindow(const VWindow& window) = delete;
-    VWindow& operator=(const VWindow& window) = delete;
+    Window(const Window& window) = delete;
+    Window& operator=(const Window& window) = delete;
 
     VkResult createWindowSurface(VkInstance instance, VkSurfaceKHR* surface) const;
 

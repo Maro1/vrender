@@ -1,8 +1,10 @@
-#include "vpipeline.h"
+#include "pipeline.h"
 
-#include "core/vbuffer.h"
+#include "core/buffer.h"
 
-VPipeline::VPipeline(VDevice* device, VSwapChain* swapChain, VDescriptorSetAllocator* descriptorSetAllocator)
+namespace vrender
+{
+Pipeline::Pipeline(Device* device, SwapChain* swapChain, DescriptorSetAllocator* descriptorSetAllocator)
     : m_Device(device), m_SwapChain(swapChain),
       m_Shader(device, "shader_bin/triangle.vert.spv", "shader_bin/triangle.frag.spv")
 {
@@ -11,19 +13,19 @@ VPipeline::VPipeline(VDevice* device, VSwapChain* swapChain, VDescriptorSetAlloc
     createGraphicsPipeline();
 }
 
-VPipeline::~VPipeline()
+Pipeline::~Pipeline()
 {
     vkDestroyPipeline(m_Device->device(), m_Pipeline, nullptr);
     vkDestroyPipelineLayout(m_Device->device(), m_Layout, nullptr);
 }
 
-void VPipeline::bind(const VkCommandBuffer& commandBuffer)
+void Pipeline::bind(const VkCommandBuffer& commandBuffer)
 {
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_Pipeline);
 }
 
 // TODO: Refactor this monster
-bool VPipeline::createGraphicsPipeline()
+bool Pipeline::createGraphicsPipeline()
 {
     VkPipelineShaderStageCreateInfo vertStageCreateInfo = {};
     vertStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -155,4 +157,4 @@ bool VPipeline::createGraphicsPipeline()
     return vkCreateGraphicsPipelines(m_Device->device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_Pipeline) ==
            VK_SUCCESS;
 }
-
+}; // namespace vrender

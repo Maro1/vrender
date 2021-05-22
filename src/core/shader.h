@@ -1,25 +1,26 @@
 #pragma once
 
-#include "vdevice.h"
+#include "device.h"
 
-#include <vector>
 #include <string>
+#include <vector>
 
-class VShader 
+namespace vrender
+{
+
+class Shader
 {
 public:
+    Shader(Device* device, const std::string& vertexPath, const std::string& fragmentPath);
+    ~Shader();
 
-    VShader(VDevice* device, const std::string& vertexPath, const std::string& fragmentPath);
-    ~VShader();
-
-    VShader(const VShader&) = delete;
-    VShader& operator=(const VShader&) = delete;
+    Shader(const Shader&) = delete;
+    Shader& operator=(const Shader&) = delete;
 
     inline const VkShaderModule& vertexModule() const { return m_VertModule; }
     inline const VkShaderModule& fragmentModule() const { return m_FragModule; }
 
 private:
-
     static std::vector<char> readFile(const std::string& filename);
     VkShaderModule createShaderModule(const std::vector<char>& code);
 
@@ -28,5 +29,7 @@ private:
 
     VkShaderModule m_VertModule;
     VkShaderModule m_FragModule;
-    VDevice* m_Device;
+    Device* m_Device;
 };
+
+}; // namespace vrender

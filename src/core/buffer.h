@@ -1,13 +1,18 @@
 #pragma once
 
-#include "core/vdevice.h"
+#include "core/device.h"
 #include "glm/glm.hpp"
 #include <array>
 
-struct Vertex {
+namespace vrender
+{
+
+struct Vertex
+{
     glm::vec3 position;
 
-    static VkVertexInputBindingDescription getBindingDescription() {
+    static VkVertexInputBindingDescription getBindingDescription()
+    {
         VkVertexInputBindingDescription bindingDescription = {};
         bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
         bindingDescription.stride = sizeof(Vertex);
@@ -16,10 +21,9 @@ struct Vertex {
     }
 
     // TODO: Only 1 element for now, expand when adding texcoord, normal etc
-    static std::array<VkVertexInputAttributeDescription, 1>
-    getAttributeDescription() {
-        std::array<VkVertexInputAttributeDescription, 1> attributeDescriptions =
-            {};
+    static std::array<VkVertexInputAttributeDescription, 1> getAttributeDescription()
+    {
+        std::array<VkVertexInputAttributeDescription, 1> attributeDescriptions = {};
 
         attributeDescriptions[0].location = 0;
         attributeDescriptions[0].binding = 0;
@@ -30,45 +34,45 @@ struct Vertex {
     }
 };
 
-struct VBufferInfo {
+struct BufferInfo
+{
     VkDeviceSize size;
     VkBufferUsageFlags usage;
     VkMemoryPropertyFlags memoryProperties;
 };
 
-class VBuffer {
-  public:
-    VBuffer(VDevice* device, const VBufferInfo& bufferInfo);
+class Buffer
+{
+public:
+    Buffer(Device* device, const BufferInfo& bufferInfo);
 
-    ~VBuffer();
+    ~Buffer();
 
-    VBuffer(const VBuffer&) = delete;
-    VBuffer& operator=(const VBuffer&) = delete;
+    Buffer(const Buffer&) = delete;
+    Buffer& operator=(const Buffer&) = delete;
 
     void* copyData(void* src, size_t size);
 
     inline const VkBuffer& buffer() const { return m_Buffer; }
 
-  protected:
-    VBuffer(VDevice* device) : m_Device(device) {}
-    bool createBuffer(const VBufferInfo& bufferInfo, VkBuffer& buffer,
-                      VkDeviceMemory& memory);
+protected:
+    Buffer(Device* device) : m_Device(device) {}
+    bool createBuffer(const BufferInfo& bufferInfo, VkBuffer& buffer, VkDeviceMemory& memory);
 
-    VDevice* m_Device;
+    Device* m_Device;
 
     VkBuffer m_Buffer;
     VkDeviceMemory m_Memory;
 
-  private:
-    bool findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags flags,
-                        uint32_t& typeIndex);
+private:
+    bool findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags flags, uint32_t& typeIndex);
 };
 
-class VVertexBuffer : public VBuffer {
-  public:
-    VVertexBuffer(VDevice* device, const std::vector<Vertex>* vertices,
-                  const std::vector<uint16_t>* indices);
-    ~VVertexBuffer();
+class VertexBuffer : public Buffer
+{
+public:
+    VertexBuffer(Device* device, const std::vector<Vertex>* vertices, const std::vector<uint16_t>* indices);
+    ~VertexBuffer();
 
     // TODO: Change if can bind multiple at a time
     void bind(const VkCommandBuffer& commandBuffer) const;
@@ -77,7 +81,7 @@ class VVertexBuffer : public VBuffer {
     inline const std::vector<uint16_t>* indices() const { return m_Indices; }
     inline const VkBuffer& indexBuffer() const { return m_IndexBuffer; }
 
-  private:
+private:
     void createVertexBuffer();
     void createIndexBuffer();
     void copyBuffer(const VkBuffer& dstBuffer, VkDeviceSize size);
@@ -91,3 +95,4 @@ class VVertexBuffer : public VBuffer {
     VkBuffer m_IndexBuffer;
     VkDeviceMemory m_IndexMemory;
 };
+}; // namespace vrender
