@@ -1,5 +1,8 @@
 #pragma once
 
+#include "app/key_codes.h"
+
+#include <bitset>
 #include <vector>
 
 namespace vrender
@@ -15,7 +18,8 @@ enum class EventType
     MouseButtonPress,
     MouseButtonRelease,
     MouseMove,
-    MouseScroll
+    MouseScroll,
+    InputState
 };
 
 class Event;
@@ -23,13 +27,17 @@ class Event;
 class EventHandler
 {
 public:
+    EventHandler() {}
     virtual void handle(const Event& event) = 0;
+
+    EventHandler(const EventHandler&) = delete;
+    void operator=(const EventHandler&) = delete;
 };
 
 class Event
 {
 public:
-    virtual EventType getType() const = 0;
+    virtual EventType type() const = 0;
 };
 
 class WindowResizeEvent : public Event
@@ -41,11 +49,24 @@ public:
     unsigned int width() const { return m_Width; }
     unsigned int height() const { return m_Height; }
 
-    virtual EventType getType() const override { return EventType::WindowResize; }
+    virtual EventType type() const override { return EventType::WindowResize; }
 
 private:
     unsigned int m_Width;
     unsigned int m_Height;
+};
+
+class InputStateEvent : public Event
+{
+public:
+    InputStateEvent(std::bitset<NUM_KEYBOARD_KEYS> keyStates) : m_KeyStates(keyStates) {}
+
+    virtual EventType type() const override { return EventType::InputState; }
+
+    std::bitset<NUM_KEYBOARD_KEYS> keyStates() const { return m_KeyStates; }
+
+private:
+    std::bitset<NUM_KEYBOARD_KEYS> m_KeyStates;
 };
 
 }; // namespace vrender

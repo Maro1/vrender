@@ -20,7 +20,7 @@ class KeyPressedEvent : public KeyEvent
 public:
     KeyPressedEvent(int keycode, int repeatCount) : KeyEvent(keycode), m_RepeatCount(repeatCount) {}
 
-    virtual EventType getType() const override { return EventType::KeyPress; }
+    virtual EventType type() const override { return EventType::KeyPress; }
 
 private:
     int m_RepeatCount;
@@ -31,7 +31,7 @@ class KeyReleasedEvent : public KeyEvent
 public:
     KeyReleasedEvent(int keycode) : KeyEvent(keycode) {}
 
-    virtual EventType getType() const override { return EventType::KeyRelease; }
+    virtual EventType type() const override { return EventType::KeyRelease; }
 };
 
 class KeyTypedEvent : public KeyEvent
@@ -39,6 +39,6 @@ class KeyTypedEvent : public KeyEvent
 public:
     KeyTypedEvent(int keycode) : KeyEvent(keycode) {}
 
-    virtual EventType getType() const override { return EventType::KeyType; }
+    virtual EventType type() const override { return EventType::KeyType; }
 };
 }; // namespace vrender

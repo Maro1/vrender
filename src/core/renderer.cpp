@@ -11,13 +11,15 @@ namespace vrender
 
 Renderer::Renderer(Device* device, SwapChain* swapChain, Window* window)
     : m_Device(device), m_SwapChain(swapChain), m_Window(window), m_DescriptorPool(device, swapChain->images().size()),
-      m_Pipeline(device, swapChain, m_DescriptorPool.allocator())
+      m_Pipeline(device, swapChain, m_DescriptorPool.allocator()), m_CameraController(&m_Camera)
 {
     m_VertexBuffers.push_back(new VertexBuffer(m_Device, &vertices, &indices));
     createMVPBuffers();
     populateDescriptors();
     init();
     m_Camera.setAspectRatio((float)m_SwapChain->extent().width / (float)m_SwapChain->extent().height);
+    m_Camera.rotate(glm::angleAxis(glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+    m_Camera.setPosition(glm::vec3(0.0f, 4.0f, 4.0f));
 }
 
 Renderer::~Renderer()
@@ -147,10 +149,10 @@ void Renderer::updateMVP()
     static bool yes = false;
     if (!yes)
     {
-        m_Camera.rotate(glm::angleAxis(glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+        // m_Camera.rotate(glm::angleAxis(glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
         yes = true;
     }
-    m_Camera.setPosition(glm::vec3(0.0f, 4.0f, 4.0f));
+    // m_Camera.setPosition(glm::vec3(0.0f, 4.0f, 4.0f));
 
     mvp.model = glm::mat4(1.0f); //
     mvp.model = glm::rotate(mvp.model, time * glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));

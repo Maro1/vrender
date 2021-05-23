@@ -5,6 +5,7 @@
 #include "core/pipeline.h"
 #include "core/swap_chain.h"
 
+#include "scene/arcball_camera.h"
 #include "scene/camera.h"
 
 #include <vector>
@@ -36,6 +37,7 @@ public:
     void draw(const VkCommandBuffer& commandBuffer); // TODO: MOVE TO SCENE GRAPH
 
     inline Pipeline& pipeline() { return m_Pipeline; }
+    inline CameraController& cameraController() { return m_CameraController; }
 
 private:
     void init();
@@ -52,6 +54,7 @@ private:
     DescriptorPool m_DescriptorPool;
     Pipeline m_Pipeline;
     Camera m_Camera;
+    ArcballCameraController m_CameraController;
 
     std::vector<VkFence> m_InFlightFences;
     std::vector<VkCommandBuffer> m_CommandBuffers;

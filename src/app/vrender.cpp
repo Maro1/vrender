@@ -8,7 +8,9 @@ VRender::VRender()
     : m_Window(m_AppInfo.title), m_Device(m_AppInfo, m_Window), m_SwapChain(&m_Device, &m_Window),
       m_Renderer(&m_Device, &m_SwapChain, &m_Window)
 {
-    m_Window.registerHandler(&testClass, EventType::KeyPress);
+    m_Window.registerHandler(&m_Renderer.cameraController(),
+                             {EventType::KeyPress, EventType::KeyRelease, EventType::MouseMove,
+                              EventType::MouseButtonPress, EventType::MouseButtonRelease, EventType::InputState});
 }
 
 VRender::~VRender() {}
@@ -20,6 +22,7 @@ int VRender::run()
     while (!m_Window.shouldClose())
     {
         glfwPollEvents();
+        m_Window.update();
         VkCommandBuffer commandBuffer = m_Renderer.beginFrame();
         m_Renderer.beginRenderPass();
         m_Renderer.pipeline().bind(commandBuffer);

@@ -1,6 +1,7 @@
 #include "window.h"
 
-#include "key_events.h"
+#include "events/key_events.h"
+#include "events/mouse_events.h"
 
 namespace vrender
 {
@@ -47,10 +48,22 @@ VkResult Window::createWindowSurface(VkInstance instance, VkSurfaceKHR* surface)
     return glfwCreateWindowSurface(instance, m_WindowInstance, nullptr, surface);
 }
 
+void Window::update()
+{
+    double deltaTime = glfwGetTime() - m_Time;
+    m_Time = glfwGetTime();
+
+    InputStateEvent e(m_KeyStates);
+    handleEvent(EventType::InputState, e);
+    // TODO: NewFrameEvent e(deltaTime, keyStates);
+}
+
 void Window::setCallbacks()
 {
     glfwSetFramebufferSizeCallback(m_WindowInstance, Window::framebufferSizeCallback);
     glfwSetKeyCallback(m_WindowInstance, Window::keyCallback);
+    glfwSetMouseButtonCallback(m_WindowInstance, Window::mouseButtonCallback);
+    glfwSetCursorPosCallback(m_WindowInstance, Window::mouseMoveCallback);
 }
 
 void Window::framebufferSizeCallback(GLFWwindow* window, int width, int height)
@@ -61,10 +74,7 @@ void Window::framebufferSizeCallback(GLFWwindow* window, int width, int height)
     pWindow->m_Height = height;
 
     WindowResizeEvent e(width, height);
-    for (EventHandler* handler : pWindow->m_EventHandlers.at(EventType::WindowResize))
-    {
-        handler->handle(e);
-    }
+    pWindow->handleEvent(EventType::WindowResize, e);
 }
 
 void Window::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -74,35 +84,74 @@ void Window::keyCallback(GLFWwindow* window, int key, int scancode, int action, 
     switch (action)
     {
     case GLFW_PRESS: {
+        pWindow->m_KeyStates[key] = 1;
         KeyPressedEvent e(scancode, 0);
-        for (EventHandler* handler : pWindow->m_EventHandlers.at(EventType::KeyPress))
-        {
-            handler->handle(e);
-        }
+        pWindow->handleEvent(EventType::KeyPress, e);
         break;
     }
     case GLFW_RELEASE: {
+        pWindow->m_KeyStates[key] = 0;
         KeyReleasedEvent e(scancode);
-        for (EventHandler* handler : pWindow->m_EventHandlers.at(EventType::KeyRelease))
-        {
-            handler->handle(e);
-        }
+        pWindow->handleEvent(EventType::KeyRelease, e);
         break;
     }
     case GLFW_REPEAT: {
         KeyPressedEvent e(scancode, 1);
-        for (EventHandler* handler : pWindow->m_EventHandlers.at(EventType::KeyPress))
-        {
-            handler->handle(e);
-        }
+        pWindow->handleEvent(EventType::KeyPress, e);
         break;
     }
     }
 }
 
+void Window::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+{
+    Window* pWindow = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+
+    double x, y;
+    glfwGetCursorPos(window, &x, &y);
+
+    switch (action)
+    {
+    case GLFW_PRESS: {
+        MousePressedEvent e(button, x, y, mods);
+        pWindow->handleEvent(EventType::MouseButtonPress, e);
+        break;
+    }
+    case GLFW_RELEASE: {
+        MouseReleasedEvent e(button, x, y);
+        pWindow->handleEvent(EventType::MouseButtonRelease, e);
+    }
+    }
+}
+
+void Window::mouseMoveCallback(GLFWwindow* window, double x, double y)
+{
+    Window* pWindow = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+
+    MouseMovedEvent e(x, y);
+    pWindow->handleEvent(EventType::MouseScroll, e);
+}
+
+void Window::handleEvent(EventType type, const Event& event)
+{
+    for (EventHandler* handler : m_EventTypeHandlers.at(type))
+    {
+        handler->handle(event);
+    }
+}
+
 void Window::registerHandler(EventHandler* handler, EventType eventType)
 {
-    m_EventHandlers.at(eventType).push_back(handler);
+    m_EventTypeHandlers.at(eventType).push_back(handler);
+}
+
+void Window::registerHandler(EventHandler* handler, const std::vector<EventType>& eventTypes)
+{
+    m_EventHandlers.push_back(handler);
+    for (EventType t : eventTypes)
+    {
+        m_EventTypeHandlers.at(t).push_back(handler);
+    }
 }
 
 }; // namespace vrender

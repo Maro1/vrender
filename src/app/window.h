@@ -1,10 +1,12 @@
 #pragma once
 
-#include "app/events.h"
+#include "app/key_codes.h"
+#include "events/events.h"
 
 #define GLFW_INCLUDE_VULKAN
 #include "GLFW/glfw3.h"
 
+#include <bitset>
 #include <map>
 #include <string>
 #include <vector>
@@ -32,10 +34,17 @@ public:
 
     void setFrameBufferResized(bool resized) { m_FramebufferResized = resized; }
 
+    // Called every frame for poll events
+    void update();
+
     void registerHandler(EventHandler* handler, EventType eventType);
+    void registerHandler(EventHandler* handler, const std::vector<EventType>& eventType);
+    void handleEvent(EventType type, const Event& event);
 
     static void framebufferSizeCallback(GLFWwindow* window, int width, int height);
     static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+    static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+    static void mouseMoveCallback(GLFWwindow* window, double x, double y);
 
 private:
     void init();
@@ -47,13 +56,25 @@ private:
 
     bool m_FramebufferResized = false;
 
-    std::map<EventType, std::vector<EventHandler*>> m_EventHandlers = {
-        {EventType::KeyPress, {}},    {EventType::KeyRelease, {}},       {EventType::KeyType, {}},
-        {EventType::WindowClose, {}}, {EventType::WindowResize, {}},     {EventType::WindowMove, {}},
-        {EventType::KeyPress, {}},    {EventType::MouseButtonPress, {}}, {EventType::MouseButtonRelease, {}},
-        {EventType::MouseMove, {}},   {EventType::MouseScroll, {}}
+    std::map<EventType, std::vector<EventHandler*>> m_EventTypeHandlers = {{EventType::KeyPress, {}},
+                                                                           {EventType::KeyRelease, {}},
+                                                                           {EventType::KeyType, {}},
+                                                                           {EventType::WindowClose, {}},
+                                                                           {EventType::WindowResize, {}},
+                                                                           {EventType::WindowMove, {}},
+                                                                           {EventType::KeyPress, {}},
+                                                                           {EventType::MouseButtonPress, {}},
+                                                                           {EventType::MouseButtonRelease, {}},
+                                                                           {EventType::MouseMove, {}},
+                                                                           {EventType::MouseScroll, {}},
+                                                                           {EventType::InputState, {}}
 
     };
+
+    std::vector<EventHandler*> m_EventHandlers;
+
+    double m_Time;
+    std::bitset<NUM_KEYBOARD_KEYS> m_KeyStates;
 
     static constexpr unsigned int DEFAULT_WIDTH = 800;
     static constexpr unsigned int DEFAULT_HEIGHT = 600;
