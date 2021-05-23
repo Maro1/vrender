@@ -8,6 +8,7 @@ VRender::VRender()
     : m_Window(m_AppInfo.title), m_Device(m_AppInfo, m_Window), m_SwapChain(&m_Device, &m_Window),
       m_Renderer(&m_Device, &m_SwapChain, &m_Window)
 {
+    m_Window.registerHandler(&testClass, EventType::KeyPress);
 }
 
 VRender::~VRender() {}

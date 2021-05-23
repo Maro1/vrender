@@ -143,7 +143,6 @@ void Renderer::updateMVP()
     auto currentTime = std::chrono::high_resolution_clock::now();
     float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
-    m_Camera.setPosition(glm::vec3(0.0f, -2.0f, -2.0f));
     MVP mvp;
     static bool yes = false;
     if (!yes)
@@ -151,8 +150,11 @@ void Renderer::updateMVP()
         m_Camera.rotate(glm::angleAxis(glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
         yes = true;
     }
+    m_Camera.setPosition(glm::vec3(0.0f, 4.0f, 4.0f));
 
-    mvp.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    mvp.model = glm::mat4(1.0f); //
+    mvp.model = glm::rotate(mvp.model, time * glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    mvp.model = glm::translate(mvp.model, glm::vec3(0.0f, 0.0f, 0.0f));
     mvp.view = m_Camera.view();
     mvp.proj = m_Camera.projection();
     mvp.proj[1][1] *= -1;

@@ -5,8 +5,21 @@
 #include "core/pipeline.h"
 #include "core/renderer.h"
 
+#include "app/key_events.h"
+#include "utils/log.h"
+
 namespace vrender
 {
+
+class TestClass : public EventHandler
+{
+    virtual void handle(const Event& event) override
+    {
+        const KeyPressedEvent& e = reinterpret_cast<const KeyPressedEvent&>(event);
+        V_LOG_INFO("Keycode: {}", e.getKeyCode());
+    }
+};
+
 struct AppInfo
 {
     std::string title;
@@ -32,5 +45,7 @@ private:
     Device m_Device;
     SwapChain m_SwapChain;
     Renderer m_Renderer;
+
+    TestClass testClass;
 };
 }; // namespace vrender

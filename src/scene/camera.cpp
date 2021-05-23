@@ -13,7 +13,7 @@ void Camera::rotate(const glm::quat& angle)
 glm::mat4 Camera::view() const
 {
     glm::mat4 rot = glm::toMat4(m_Rotation);
-    return glm::translate(rot, m_Position);
+    return glm::translate(rot, -m_Position);
 }
 
 glm::mat4 Camera::projection() const
