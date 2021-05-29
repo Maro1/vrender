@@ -33,6 +33,7 @@ void Window::init()
 
     m_WindowInstance = glfwCreateWindow(m_Width, m_Height, m_Title.c_str(), nullptr, nullptr);
     glfwSetWindowUserPointer(m_WindowInstance, this);
+    glfwSetInputMode(m_WindowInstance, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     setCallbacks();
 
@@ -53,7 +54,7 @@ void Window::update()
     double deltaTime = glfwGetTime() - m_Time;
     m_Time = glfwGetTime();
 
-    InputStateEvent e(m_KeyStates);
+    InputStateEvent e(m_KeyStates, deltaTime);
     handleEvent(EventType::InputState, e);
     // TODO: NewFrameEvent e(deltaTime, keyStates);
 }
@@ -129,7 +130,7 @@ void Window::mouseMoveCallback(GLFWwindow* window, double x, double y)
     Window* pWindow = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
 
     MouseMovedEvent e(x, y);
-    pWindow->handleEvent(EventType::MouseScroll, e);
+    pWindow->handleEvent(EventType::MouseMove, e);
 }
 
 void Window::handleEvent(EventType type, const Event& event)

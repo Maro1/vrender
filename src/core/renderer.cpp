@@ -18,8 +18,8 @@ Renderer::Renderer(Device* device, SwapChain* swapChain, Window* window)
     populateDescriptors();
     init();
     m_Camera.setAspectRatio((float)m_SwapChain->extent().width / (float)m_SwapChain->extent().height);
-    m_Camera.rotate(glm::angleAxis(glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
-    m_Camera.setPosition(glm::vec3(0.0f, 4.0f, 4.0f));
+    // m_Camera.rotate(glm::angleAxis(glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+    m_Camera.setPosition(glm::vec3(0.0f, 0.0f, 4.0f));
 }
 
 Renderer::~Renderer()
@@ -155,8 +155,8 @@ void Renderer::updateMVP()
     // m_Camera.setPosition(glm::vec3(0.0f, 4.0f, 4.0f));
 
     mvp.model = glm::mat4(1.0f); //
-    mvp.model = glm::rotate(mvp.model, time * glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    mvp.model = glm::translate(mvp.model, glm::vec3(0.0f, 0.0f, 0.0f));
+    // mvp.model = glm::rotate(mvp.model, time * glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    // mvp.model = glm::translate(mvp.model, glm::vec3(0.0f, 0.0f, 0.0f));
     mvp.view = m_Camera.view();
     mvp.proj = m_Camera.projection();
     mvp.proj[1][1] *= -1;

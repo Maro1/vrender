@@ -18,6 +18,10 @@ public:
 
     inline void setAspectRatio(float aspectRatio) { m_AspectRatio = aspectRatio; }
     inline void setPosition(const glm::vec3& position) { m_Position = position; }
+    inline void setRotation(const glm::quat& rotation) { m_Rotation = rotation; }
+
+    inline const glm::vec3& position() const { return m_Position; }
+    inline const glm::quat& rotation() const { return m_Rotation; }
 
     void rotate(const glm::quat& angle);
     void translate(const glm::vec3& translation);
@@ -49,7 +53,7 @@ protected:
     virtual void mouseRelease(int button, int x, int y) = 0;
     virtual void keyPressed(int key) = 0;
     virtual void keyReleased(int key) = 0;
-    virtual void update(std::bitset<NUM_KEYBOARD_KEYS>) = 0;
+    virtual void update(std::bitset<NUM_KEYBOARD_KEYS> keyStates, float deltaTime) = 0;
 
     Camera* m_Camera;
 };

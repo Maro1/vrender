@@ -60,7 +60,7 @@ void CameraController::handle(const Event& event)
     }
     case EventType::InputState: {
         const InputStateEvent& e = reinterpret_cast<const InputStateEvent&>(event);
-        update(e.keyStates());
+        update(e.keyStates(), e.deltaTime());
     }
     default:
         break;

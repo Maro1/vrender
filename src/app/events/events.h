@@ -46,8 +46,8 @@ class WindowResizeEvent : public Event
 public:
     WindowResizeEvent(unsigned int width, unsigned int height) : m_Width(width), m_Height(height) {}
 
-    unsigned int width() const { return m_Width; }
-    unsigned int height() const { return m_Height; }
+    inline unsigned int width() const { return m_Width; }
+    inline unsigned int height() const { return m_Height; }
 
     virtual EventType type() const override { return EventType::WindowResize; }
 
@@ -59,14 +59,19 @@ private:
 class InputStateEvent : public Event
 {
 public:
-    InputStateEvent(std::bitset<NUM_KEYBOARD_KEYS> keyStates) : m_KeyStates(keyStates) {}
+    InputStateEvent(std::bitset<NUM_KEYBOARD_KEYS> keyStates, double deltaTime)
+        : m_KeyStates(keyStates), m_DeltaTime(deltaTime)
+    {
+    }
 
     virtual EventType type() const override { return EventType::InputState; }
 
-    std::bitset<NUM_KEYBOARD_KEYS> keyStates() const { return m_KeyStates; }
+    inline std::bitset<NUM_KEYBOARD_KEYS> keyStates() const { return m_KeyStates; }
+    inline double deltaTime() const { return m_DeltaTime; }
 
 private:
     std::bitset<NUM_KEYBOARD_KEYS> m_KeyStates;
+    double m_DeltaTime;
 };
 
 }; // namespace vrender
