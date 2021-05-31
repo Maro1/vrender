@@ -1,6 +1,5 @@
 #include "renderer.h"
 
-#define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -10,28 +9,21 @@ namespace vrender
 {
 
 Renderer::Renderer(Device* device, SwapChain* swapChain, Window* window)
-    : m_Device(device), m_SwapChain(swapChain), m_Window(window), m_DescriptorPool(device, swapChain->images().size()),
+    : m_Device(device), m_SwapChain(swapChain), m_Window(window), m_DescriptorAllocator(device), m_DescriptorPool(device, &m_DescriptorAllocator, swapChain->images().size()),
       m_Pipeline(device, swapChain, m_DescriptorPool.allocator()), m_CameraController(&m_Camera)
 {
-    m_VertexBuffers.push_back(new VertexBuffer(m_Device, &vertices, &indices));
+    std::unique_ptr<VertexBuffer> cube = std::make_unique<VertexBuffer>(m_Device, &vertices, &indices);
+    m_VertexBuffers.push_back(std::move(cube));
     createMVPBuffers();
     populateDescriptors();
     init();
     m_Camera.setAspectRatio((float)m_SwapChain->extent().width / (float)m_SwapChain->extent().height);
-    // m_Camera.rotate(glm::angleAxis(glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
     m_Camera.setPosition(glm::vec3(0.0f, 0.0f, 4.0f));
 }
 
 Renderer::~Renderer()
 {
-    for (auto buffer : m_VertexBuffers)
-    {
-        delete buffer;
-    }
-    for (auto buffer : m_MVPBuffers)
-    {
-        delete buffer;
-    }
+
 }
 
 void Renderer::init()
@@ -91,7 +83,7 @@ void Renderer::beginRenderPass()
     VkRenderPassBeginInfo renderPassInfo = {};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = m_SwapChain->renderPass();
-    renderPassInfo.framebuffer = m_SwapChain->framebuffer(m_CurrentImage)->framebuffer();
+    renderPassInfo.framebuffer = m_SwapChain->framebuffer(m_CurrentImage);
     renderPassInfo.renderArea = {0, 0};
     renderPassInfo.renderArea.extent = m_SwapChain->extent();
 
@@ -168,8 +160,6 @@ void Renderer::createMVPBuffers()
 {
     VkDeviceSize bufferSize = sizeof(MVP);
 
-    m_MVPBuffers.resize(m_SwapChain->images().size());
-
     BufferInfo bufferInfo;
     bufferInfo.size = bufferSize;
     bufferInfo.memoryProperties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
@@ -177,7 +167,8 @@ void Renderer::createMVPBuffers()
 
     for (unsigned int i = 0; i < m_SwapChain->images().size(); i++)
     {
-        m_MVPBuffers[i] = new Buffer(m_Device, bufferInfo);
+        std::unique_ptr<Buffer> buffer = std::make_unique<Buffer>(m_Device, bufferInfo);
+        m_MVPBuffers.push_back(std::move(buffer)); 
     }
 }
 

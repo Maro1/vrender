@@ -79,6 +79,7 @@ void* Buffer::copyData(void* src, size_t size)
     vkMapMemory(m_Device->device(), m_Memory, 0, size, 0, &data);
     memcpy(data, src, size);
     vkUnmapMemory(m_Device->device(), m_Memory);
+    return data;
 }
 
 // ----------- VVertexBuffer --------------

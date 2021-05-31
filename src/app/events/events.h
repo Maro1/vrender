@@ -1,6 +1,7 @@
 #pragma once
 
 #include "app/key_codes.h"
+#include "utils/noncopyable.h"
 
 #include <bitset>
 #include <vector>
@@ -24,14 +25,13 @@ enum class EventType
 
 class Event;
 
-class EventHandler
+class EventHandler : private NonCopyable
 {
 public:
-    EventHandler() {}
-    virtual void handle(const Event& event) = 0;
+    EventHandler() = default;
+    virtual ~EventHandler() = default;
 
-    EventHandler(const EventHandler&) = delete;
-    void operator=(const EventHandler&) = delete;
+    virtual void handle(const Event& event) = 0;
 };
 
 class Event

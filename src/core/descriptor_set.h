@@ -1,20 +1,18 @@
 #pragma once
 
 #include "core/device.h"
+#include "utils/noncopyable.h"
 
 namespace vrender
 {
 
 class DescriptorSetAllocator;
 
-class DescriptorPool
+class DescriptorPool : private NonCopyable
 {
 public:
-    DescriptorPool(Device* device, unsigned int descriptorCount);
+    DescriptorPool(Device* device, DescriptorSetAllocator*, unsigned int descriptorCount);
     ~DescriptorPool();
-
-    DescriptorPool(const DescriptorPool&) = delete;
-    DescriptorPool& operator=(const DescriptorPool&) = delete;
 
     inline const std::vector<VkDescriptorSet>& descriptorSets() const { return m_DescriptorSets; }
 
@@ -36,9 +34,6 @@ class DescriptorSetAllocator
 public:
     DescriptorSetAllocator(Device* device);
     ~DescriptorSetAllocator();
-
-    DescriptorSetAllocator(const DescriptorSetAllocator&) = delete;
-    DescriptorSetAllocator& operator=(const DescriptorSetAllocator&) = delete;
 
     VkDescriptorSetLayout layout() const { return m_Layout; }
 

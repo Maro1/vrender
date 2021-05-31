@@ -14,11 +14,8 @@ public:
     Shader(Device* device, const std::string& vertexPath, const std::string& fragmentPath);
     ~Shader();
 
-    Shader(const Shader&) = delete;
-    Shader& operator=(const Shader&) = delete;
-
-    inline const VkShaderModule& vertexModule() const { return m_VertModule; }
-    inline const VkShaderModule& fragmentModule() const { return m_FragModule; }
+    inline VkShaderModule vertexModule() const { return m_VertModule; }
+    inline VkShaderModule fragmentModule() const { return m_FragModule; }
 
 private:
     static std::vector<char> readFile(const std::string& filename);

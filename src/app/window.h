@@ -2,6 +2,7 @@
 
 #include "app/key_codes.h"
 #include "events/events.h"
+#include "utils/noncopyable.h"
 
 #define GLFW_INCLUDE_VULKAN
 #include "GLFW/glfw3.h"
@@ -13,15 +14,12 @@
 
 namespace vrender
 {
-class Window
+class Window : private NonCopyable
 {
 public:
     Window(unsigned int width, unsigned int height, const std::string& title);
     Window(const std::string& title) : Window(DEFAULT_WIDTH, DEFAULT_HEIGHT, title) {}
     ~Window();
-
-    Window(const Window& window) = delete;
-    Window& operator=(const Window& window) = delete;
 
     VkResult createWindowSurface(VkInstance instance, VkSurfaceKHR* surface) const;
 

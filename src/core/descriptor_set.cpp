@@ -3,16 +3,15 @@
 namespace vrender
 {
 
-DescriptorPool::DescriptorPool(Device* device, unsigned int descriptorCount) : m_Device(device)
+DescriptorPool::DescriptorPool(Device* device, DescriptorSetAllocator* allocator, unsigned int descriptorCount)
+    : m_Device(device), m_Allocator(allocator)
 {
-    m_Allocator = new DescriptorSetAllocator(device);
     createDescriptorPool(descriptorCount);
     m_DescriptorSets = m_Allocator->allocate(m_Pool, descriptorCount);
 }
 
 DescriptorPool::~DescriptorPool()
 {
-    delete m_Allocator;
     vkDestroyDescriptorPool(m_Device->device(), m_Pool, nullptr);
 }
 

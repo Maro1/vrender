@@ -4,16 +4,15 @@
 #include "core/shader.h"
 #include "core/swap_chain.h"
 
+#include "utils/noncopyable.h"
+
 namespace vrender
 {
-class Pipeline
+class Pipeline : private NonCopyable
 {
 public:
     Pipeline(Device* device, SwapChain* swapChain, DescriptorSetAllocator* descriptorSetAllocator);
     ~Pipeline();
-
-    Pipeline(const Pipeline&) = delete;
-    Pipeline& operator=(const Pipeline&) = delete;
 
     void bind(const VkCommandBuffer& commandBuffer);
 

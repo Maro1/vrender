@@ -7,6 +7,7 @@
 #include "GLFW/glfw3.h"
 
 #include "app/window.h"
+#include "utils/noncopyable.h"
 
 namespace vrender
 {
@@ -28,22 +29,19 @@ struct SwapChainSupportDetails
     std::vector<VkPresentModeKHR> presentModes;
 };
 
-class Device
+class Device : private NonCopyable
 {
 public:
-    Device(const AppInfo& appInfo, Window& window);
+    Device(const AppInfo& appInfo, Window* window);
     ~Device();
 
-    Device(const Device& device) = delete;
-    Device& operator=(const Device& device) = delete;
-
     inline const SwapChainSupportDetails swapChainSupportDetails() { return getSwapChainSupport(m_PhysicalDevice); }
-    inline const VkSurfaceKHR& surface() const { return m_Surface; }
+    inline const VkSurfaceKHR surface() const { return m_Surface; }
     inline const QueueFamilyIndices queueFamilyIndices() { return getQueueFamilies(m_PhysicalDevice); }
-    inline const VkDevice& device() const { return m_Device; }
-    inline const VkPhysicalDevice& physicalDevice() const { return m_PhysicalDevice; }
-    inline const VkCommandPool& commandPool() const { return m_CommandPool; }
-    inline const VkQueue& graphicsQueue() const { return m_GraphicsQueue; }
+    inline const VkDevice device() const { return m_Device; }
+    inline const VkPhysicalDevice physicalDevice() const { return m_PhysicalDevice; }
+    inline const VkCommandPool commandPool() const { return m_CommandPool; }
+    inline const VkQueue graphicsQueue() const { return m_GraphicsQueue; }
 
 private:
     int createVulkanInstance(const AppInfo& appInfo);
@@ -79,7 +77,7 @@ private:
     VkCommandPool m_CommandPool;
     VkSurfaceKHR m_Surface; // TODO: Move out of this class
 
-    Window& m_WindowRef;
+    Window* m_Window;
 
     float m_QueuePriority = 1.0f;
 

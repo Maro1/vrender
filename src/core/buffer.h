@@ -41,15 +41,12 @@ struct BufferInfo
     VkMemoryPropertyFlags memoryProperties;
 };
 
-class Buffer
+class Buffer : private NonCopyable
 {
 public:
     Buffer(Device* device, const BufferInfo& bufferInfo);
 
     ~Buffer();
-
-    Buffer(const Buffer&) = delete;
-    Buffer& operator=(const Buffer&) = delete;
 
     void* copyData(void* src, size_t size);
 

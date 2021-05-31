@@ -5,8 +5,10 @@
 #include "core/pipeline.h"
 #include "core/swap_chain.h"
 
-#include "scene/arcball_camera.h"
-#include "scene/camera.h"
+#include "scene/camera/arcball_camera.h"
+#include "scene/camera/camera.h"
+
+#include "utils/noncopyable.h"
 
 #include <vector>
 
@@ -21,14 +23,11 @@ struct MVP
     glm::mat4 proj;
 };
 
-class Renderer
+class Renderer : private NonCopyable
 {
 public:
     Renderer(Device* device, SwapChain* swapChain, Window* window);
     ~Renderer();
-
-    Renderer(const Renderer&) = delete;
-    Renderer& operator=(const Renderer&) = delete;
 
     VkCommandBuffer beginFrame();
     VkResult endFrame();
@@ -51,6 +50,7 @@ private:
     SwapChain* m_SwapChain;
     Window* m_Window;
 
+    DescriptorSetAllocator m_DescriptorAllocator;
     DescriptorPool m_DescriptorPool;
     Pipeline m_Pipeline;
     Camera m_Camera;
@@ -61,8 +61,8 @@ private:
     uint32_t m_CurrentFrame = 0;
     uint32_t m_CurrentImage;
 
-    std::vector<VertexBuffer*> m_VertexBuffers;
-    std::vector<Buffer*> m_MVPBuffers;
+    std::vector<std::unique_ptr<VertexBuffer>> m_VertexBuffers;
+    std::vector<std::unique_ptr<Buffer>> m_MVPBuffers;
 
     std::vector<VkSemaphore> m_RenderFinishedSemaphores;
 
@@ -75,18 +75,17 @@ private:
 
     };
 
-    const std::vector<uint16_t> indices = {
-        // front
-        0, 1, 2, 2, 3, 0,
-        // right
-        1, 5, 6, 6, 2, 1,
-        // back
-        7, 6, 5, 5, 4, 7,
-        // left
-        4, 0, 3, 3, 7, 4,
-        // bottom
-        4, 5, 1, 1, 0, 4,
-        // top
-        3, 2, 6, 6, 7, 3};
+    const std::vector<uint16_t> indices = {// front
+                                           0, 1, 2, 2, 3, 0,
+                                           // right
+                                           1, 5, 6, 6, 2, 1,
+                                           // back
+                                           7, 6, 5, 5, 4, 7,
+                                           // left
+                                           4, 0, 3, 3, 7, 4,
+                                           // bottom
+                                           4, 5, 1, 1, 0, 4,
+                                           // top
+                                           3, 2, 6, 6, 7, 3};
 };
 }; // namespace vrender

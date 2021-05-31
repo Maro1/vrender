@@ -1,7 +1,6 @@
 #pragma once
 
 #include "core/device.h"
-#include "core/framebuffer.h"
 #include <memory>
 
 namespace vrender
@@ -17,12 +16,12 @@ public:
     VkResult submitCommandBuffers(const VkCommandBuffer* buffer, uint32_t imageIndex);
 
     inline const VkExtent2D& extent() const { return m_Extent; }
-    inline const VkFormat& imageFormat() const { return m_Format.format; }
-    inline const VkRenderPass& renderPass() const { return m_RenderPass; }
-    inline const VkSwapchainKHR& swapChain() const { return m_SwapChain; }
-    inline const std::vector<Framebuffer*>& framebuffers() const { return m_Framebuffers; }
+    inline const VkFormat imageFormat() const { return m_Format.format; }
+    inline const VkRenderPass renderPass() const { return m_RenderPass; }
+    inline const VkSwapchainKHR swapChain() const { return m_SwapChain; }
+    inline const std::vector<VkFramebuffer>& framebuffers() const { return m_Framebuffers; }
     inline const std::vector<VkImage>& images() const { return m_SwapChainImages; }
-    inline const Framebuffer* framebuffer(unsigned int index) const { return m_Framebuffers[index]; }
+    inline const VkFramebuffer framebuffer(unsigned int index) const { return m_Framebuffers[index]; }
 
     static constexpr unsigned int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -51,7 +50,7 @@ private:
 
     std::vector<VkImage> m_SwapChainImages;
     std::vector<VkImageView> m_SwapChainImageViews;
-    std::vector<Framebuffer*> m_Framebuffers;
+    std::vector<VkFramebuffer> m_Framebuffers;
 
     std::vector<VkSemaphore> m_ImageAvailableSemaphores;
     std::vector<VkSemaphore> m_RenderFinishedSemaphores;

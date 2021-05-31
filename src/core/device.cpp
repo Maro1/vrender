@@ -46,7 +46,7 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
     }
 }
 
-Device::Device(const AppInfo& appInfo, Window& window) : m_WindowRef(window)
+Device::Device(const AppInfo& appInfo, Window* window) : m_Window(window)
 {
     createVulkanInstance(appInfo);
 #ifndef NDEBUG
@@ -401,7 +401,7 @@ SwapChainSupportDetails Device::getSwapChainSupport(const VkPhysicalDevice& devi
 
 VkResult Device::createSurface()
 {
-    return m_WindowRef.createWindowSurface(m_VulkanInstance, &m_Surface);
+    return m_Window->createWindowSurface(m_VulkanInstance, &m_Surface);
 }
 
 VkResult Device::createCommandPool()
@@ -415,4 +415,5 @@ VkResult Device::createCommandPool()
 
     return vkCreateCommandPool(m_Device, &poolInfo, nullptr, &m_CommandPool);
 }
+
 }; // namespace vrender

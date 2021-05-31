@@ -44,6 +44,7 @@ class CameraController : public EventHandler
 {
 public:
     CameraController(Camera* camera) : m_Camera(camera) {}
+    virtual ~CameraController() = default;
 
     virtual void handle(const Event& event) override;
 

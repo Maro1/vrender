@@ -7,18 +7,10 @@
 
 #include "events/key_events.h"
 #include "utils/log.h"
+#include "utils/noncopyable.h"
 
 namespace vrender
 {
-
-class TestClass : public EventHandler
-{
-    virtual void handle(const Event& event) override
-    {
-        const KeyPressedEvent& e = reinterpret_cast<const KeyPressedEvent&>(event);
-        V_LOG_INFO("Keycode: {}", e.getKeyCode());
-    }
-};
 
 struct AppInfo
 {
@@ -27,25 +19,16 @@ struct AppInfo
     uint32_t apiMinor;
 };
 
-class VRender
+class VRender : private NonCopyable
 {
 public:
     VRender();
     ~VRender();
 
-    VRender(const VRender& vrender) = delete;
-    VRender& operator=(const VRender& vrender) = delete;
-
     int run();
+    static const AppInfo& appInfo() { return sAppInfo; }
 
 private:
-    const AppInfo m_AppInfo = {"VRender", 1, 2};
-
-    Window m_Window;
-    Device m_Device;
-    SwapChain m_SwapChain;
-    Renderer m_Renderer;
-
-    TestClass testClass;
+    inline static const AppInfo sAppInfo = {"VRender", 1, 2};
 };
 }; // namespace vrender

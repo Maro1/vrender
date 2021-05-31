@@ -44,9 +44,9 @@ void SwapChain::recreate()
 
 void SwapChain::cleanup()
 {
-    for (Framebuffer* framebuffer : m_Framebuffers)
+    for (const VkFramebuffer& framebuffer : m_Framebuffers)
     {
-        delete framebuffer;
+        vkDestroyFramebuffer(m_Device->device(), framebuffer, nullptr);
     }
     for (const VkImageView& imageView : m_SwapChainImageViews)
     {
@@ -318,13 +318,21 @@ VkResult SwapChain::createRenderPass()
 void SwapChain::createFramebuffers()
 {
     m_Framebuffers.resize(m_SwapChainImageViews.size());
-
     for (size_t i = 0; i < m_SwapChainImageViews.size(); i++)
     {
         std::vector<VkImageView> attachments = {m_SwapChainImageViews[i]};
 
-        Framebuffer* framebuffer =
-            new Framebuffer(m_Device, m_RenderPass, m_Extent.width, m_Extent.height, attachments);
+        VkFramebuffer framebuffer;
+        VkFramebufferCreateInfo frambufferInfo = {};
+        frambufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        frambufferInfo.renderPass = m_RenderPass;
+        frambufferInfo.attachmentCount = 1;
+        frambufferInfo.pAttachments = attachments.data();
+        frambufferInfo.width = m_Extent.width;
+        frambufferInfo.height = m_Extent.height;
+        frambufferInfo.layers = 1;
+
+        vkCreateFramebuffer(m_Device->device(), &frambufferInfo, nullptr, &framebuffer);
 
         m_Framebuffers[i] = framebuffer;
     }

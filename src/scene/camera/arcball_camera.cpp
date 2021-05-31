@@ -74,6 +74,8 @@ glm::vec3 ArcballCameraController::tumble(float deltaX, float deltaY)
     // Translate pos to target to origin
     glm::vec3 originPosToTarget = m_Camera->position() - m_Target;
 
+    float initialDistance = glm::length(originPosToTarget);
+
     // Axis of rotation
     glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
     glm::vec3 right = glm::vec3(1.0f, 0.0f, 0.0f) * m_Camera->rotation();
@@ -84,10 +86,14 @@ glm::vec3 ArcballCameraController::tumble(float deltaX, float deltaY)
     newPos = (1 - glm::cos(deltaY)) * (glm::dot(newPos, right)) * right + glm::cos(deltaY) * newPos +
              glm::sin(deltaY) * glm::cross(right, newPos);
 
+    if (initialDistance != glm::distance(newPos, m_Target))
+    {
+
+        newPos = glm::normalize(newPos) * initialDistance;
+    }
     // Translate back
     newPos += m_Target;
 
     return newPos;
 }
 }; // namespace vrender
-
