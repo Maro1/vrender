@@ -4,14 +4,16 @@
 namespace vrender
 {
 
-MemoryAllocation::MemoryAllocation(Device* device, VkDeviceSize size, uint32_t memoryTypeIndex)
+MemoryAllocation::MemoryAllocation(Device* device, VkDeviceSize size, uint32_t memoryTypeIndex) : m_Size(size)
 {
     MemoryBlock initialBlock;
+    initialBlock.typeIndex = memoryTypeIndex;
     initialBlock.size = size;
     initialBlock.free = true;
     initialBlock.offset = 0;
 
     VkMemoryAllocateInfo allocInfo = {};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = size;
     allocInfo.memoryTypeIndex = memoryTypeIndex;
 
@@ -36,6 +38,7 @@ MemoryAllocation::MemoryAllocation(Device* device, VkDeviceSize size, uint32_t m
 
 bool MemoryAllocation::freeBlock(const MemoryBlock& block)
 {
+    // TODO: MERGE CONTINUOUS BLOCKS
     auto b = std::find(m_Blocks.begin(), m_Blocks.end(), block);
     if (b == m_Blocks.end())
         return false;
@@ -48,30 +51,33 @@ bool MemoryAllocation::allocateBlock(VkDeviceSize size, MemoryBlock& rblock)
     if (size > m_Size)
         return false;
 
-    for (auto& block : m_Blocks)
+    for (unsigned int i = 0; i < m_Blocks.size(); i++)
     {
-        if (block.free)
+        if (m_Blocks[i].free)
         {
-            if (block.size == size)
+            if (m_Blocks[i].size == size)
             {
                 // Found block of same size, allocate it
-                block.free = false;
-                rblock = block;
+                m_Blocks[i].free = false;
+                rblock = m_Blocks[i];
+                m_AllocatedSize += size;
                 return true;
             }
-            if (block.size > size)
+            if (m_Blocks[i].size > size)
             {
                 // Found block of bigger size, split it and allocate
                 MemoryBlock newBlock;
-                newBlock.size = block.size - size;
-                newBlock.offset = block.offset + size;
+                newBlock.size = m_Blocks[i].size - size;
+                newBlock.offset = m_Blocks[i].offset + size;
                 newBlock.memory = m_Memory;
+                newBlock.typeIndex = m_Blocks[i].typeIndex;
                 newBlock.free = true;
                 m_Blocks.push_back(newBlock);
 
-                block.size = size;
-                block.free = false;
-                rblock = block;
+                m_Blocks[i].size = size;
+                m_Blocks[i].free = false;
+                rblock = m_Blocks[i];
+                m_AllocatedSize += size;
                 return true;
             }
         }
@@ -172,6 +178,11 @@ bool DeviceMemoryAllocator::allocate(VkDeviceSize size, uint32_t memoryTypeIndex
     MemoryAllocation* suitableAllocation = findSuitableAllocation(requestSize, memoryTypeIndex);
 
     return suitableAllocation->allocateBlock(requestSize, block);
+}
+
+void DeviceMemoryAllocator::free(const MemoryBlock& block)
+{
+    m_Allocations[block.typeIndex]->freeBlock(block);
 }
 
 }; // namespace vrender

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/device.h"
+#include "core/memory/memory_allocator.h"
 
 #include "glm/glm.hpp"
 #include <array>
@@ -55,12 +56,12 @@ public:
 
 protected:
     Buffer(Device* device) : m_Device(device) {}
-    bool createBuffer(const BufferInfo& bufferInfo, VkBuffer& buffer, VkDeviceMemory& memory);
+    bool createBuffer(const BufferInfo& bufferInfo, VkBuffer& buffer, MemoryBlock& memory);
 
     Device* m_Device = nullptr;
 
     VkBuffer m_Buffer;
-    VkDeviceMemory m_Memory;
+    MemoryBlock m_Memory;
 
 private:
     bool findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags flags, uint32_t& typeIndex);
@@ -88,9 +89,9 @@ private:
     const std::vector<uint16_t>* m_Indices;
 
     VkBuffer m_StagingBuffer;
-    VkDeviceMemory m_StagingMemory;
+    MemoryBlock m_StagingMemory;
 
     VkBuffer m_IndexBuffer;
-    VkDeviceMemory m_IndexMemory;
+    MemoryBlock m_IndexMemory;
 };
 }; // namespace vrender

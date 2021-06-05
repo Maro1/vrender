@@ -16,6 +16,7 @@ struct MemoryBlock
     VkDeviceSize offset;
 
     VkDeviceMemory memory;
+    uint32_t typeIndex;
 
     bool free;
 
@@ -44,13 +45,13 @@ public:
 private:
     VkDeviceMemory m_Memory;
     VkDeviceSize m_Size;
-    VkDeviceSize m_AllocatedSize;
+    VkDeviceSize m_AllocatedSize = 0;
     uint32_t m_MemoryTypeIndex;
 
     void* m_Ptr = nullptr;
 
     std::vector<MemoryBlock> m_Blocks;
-    MemoryAllocation* m_Next;
+    MemoryAllocation* m_Next = nullptr;
 };
 
 struct Heap

@@ -15,10 +15,12 @@ Buffer::Buffer(const BufferInfo& bufferInfo)
 Buffer::~Buffer()
 {
     vkDestroyBuffer(m_Device->device(), m_Buffer, nullptr);
-    vkFreeMemory(m_Device->device(), m_Memory, nullptr);
+
+    auto x = GraphicsContext::get().deviceMemoryAllocator();
+    GraphicsContext::get().deviceMemoryAllocator()->free(m_Memory);
 }
 
-bool Buffer::createBuffer(const BufferInfo& bufferInfo, VkBuffer& buffer, VkDeviceMemory& memory)
+bool Buffer::createBuffer(const BufferInfo& bufferInfo, VkBuffer& buffer, MemoryBlock& memory)
 {
     VkBufferCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -48,13 +50,9 @@ bool Buffer::createBuffer(const BufferInfo& bufferInfo, VkBuffer& buffer, VkDevi
     allocInfo.memoryTypeIndex = typeIndex;
     allocInfo.allocationSize = memoryRequirements.size;
 
-    if (vkAllocateMemory(m_Device->device(), &allocInfo, nullptr, &memory) != VK_SUCCESS)
-    {
-        V_LOG_ERROR("Unable to allocate memory for vertex buffer.");
-        return false;
-    }
+    GraphicsContext::get().deviceMemoryAllocator()->allocate(memoryRequirements.size, typeIndex, memory);
 
-    vkBindBufferMemory(m_Device->device(), buffer, memory, 0);
+    vkBindBufferMemory(m_Device->device(), buffer, memory.memory, memory.offset);
 
     return true;
 }
@@ -78,9 +76,9 @@ bool Buffer::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags flags, ui
 void* Buffer::copyData(void* src, size_t size)
 {
     void* data;
-    vkMapMemory(m_Device->device(), m_Memory, 0, size, 0, &data);
+    vkMapMemory(m_Device->device(), m_Memory.memory, m_Memory.offset, size, 0, &data);
     memcpy(data, src, size);
-    vkUnmapMemory(m_Device->device(), m_Memory);
+    vkUnmapMemory(m_Device->device(), m_Memory.memory);
     return data;
 }
 
@@ -95,7 +93,7 @@ VertexBuffer::VertexBuffer(Device* device, const std::vector<Vertex>* vertices, 
 VertexBuffer::~VertexBuffer()
 {
     vkDestroyBuffer(m_Device->device(), m_IndexBuffer, nullptr);
-    vkFreeMemory(m_Device->device(), m_IndexMemory, nullptr);
+    GraphicsContext::get().deviceMemoryAllocator()->free(m_IndexMemory);
 }
 
 void VertexBuffer::createVertexBuffer()
@@ -108,9 +106,9 @@ void VertexBuffer::createVertexBuffer()
     createBuffer(bufferInfo, m_StagingBuffer, m_StagingMemory);
 
     void* data;
-    vkMapMemory(m_Device->device(), m_StagingMemory, 0, bufferInfo.size, 0, &data);
+    vkMapMemory(m_Device->device(), m_StagingMemory.memory, m_StagingMemory.offset, bufferInfo.size, 0, &data);
     memcpy(data, m_Vertices->data(), (size_t)bufferInfo.size);
-    vkUnmapMemory(m_Device->device(), m_StagingMemory);
+    vkUnmapMemory(m_Device->device(), m_StagingMemory.memory);
 
     bufferInfo.size = m_Vertices->size() * sizeof(Vertex);
     bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
@@ -120,7 +118,7 @@ void VertexBuffer::createVertexBuffer()
     copyBuffer(m_Buffer, bufferInfo.size);
 
     vkDestroyBuffer(m_Device->device(), m_StagingBuffer, nullptr);
-    vkFreeMemory(m_Device->device(), m_StagingMemory, nullptr);
+    GraphicsContext::get().deviceMemoryAllocator()->free(m_StagingMemory);
 }
 
 void VertexBuffer::createIndexBuffer()
@@ -133,9 +131,9 @@ void VertexBuffer::createIndexBuffer()
     createBuffer(bufferInfo, m_StagingBuffer, m_StagingMemory);
 
     void* data;
-    vkMapMemory(m_Device->device(), m_StagingMemory, 0, bufferInfo.size, 0, &data);
+    vkMapMemory(m_Device->device(), m_StagingMemory.memory, m_StagingMemory.offset, bufferInfo.size, 0, &data);
     memcpy(data, m_Indices->data(), (size_t)bufferInfo.size);
-    vkUnmapMemory(m_Device->device(), m_StagingMemory);
+    vkUnmapMemory(m_Device->device(), m_StagingMemory.memory);
 
     bufferInfo.size = m_Indices->size() * sizeof(uint16_t);
     bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
@@ -145,7 +143,7 @@ void VertexBuffer::createIndexBuffer()
     copyBuffer(m_IndexBuffer, bufferInfo.size);
 
     vkDestroyBuffer(m_Device->device(), m_StagingBuffer, nullptr);
-    vkFreeMemory(m_Device->device(), m_StagingMemory, nullptr);
+    GraphicsContext::get().deviceMemoryAllocator()->free(m_StagingMemory);
 }
 
 void VertexBuffer::copyBuffer(const VkBuffer& dstBuffer, VkDeviceSize size)

@@ -46,6 +46,14 @@ void ArcballCameraController::update(std::bitset<NUM_KEYBOARD_KEYS> keyStates, f
         m_Camera->translate(-right * m_MoveSpeed * deltaTime);
     if (keyStates[68])
         m_Camera->translate(right * m_MoveSpeed * deltaTime);
+
+    static int i = 0;
+    if (i % 20 == 0)
+    {
+        V_LOG_INFO("FPS: {}", 1 / deltaTime);
+        i = 0;
+    }
+    i++;
 }
 
 void ArcballCameraController::mouseMoved(int x, int y)
