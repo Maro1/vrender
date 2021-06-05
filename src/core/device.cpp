@@ -58,8 +58,12 @@ Device::Device(const AppInfo& appInfo, Window* window) : m_Window(window)
         V_LOG_ERROR("Could not find any device!");
         // TODO: Exit app
     }
+    vkGetPhysicalDeviceMemoryProperties(m_PhysicalDevice, &m_MemoryProperties);
+    vkGetPhysicalDeviceProperties(m_PhysicalDevice, &m_Properties);
+
     createLogicalDevice();
     createCommandPool();
+    getMemoryProperties();
 }
 
 Device::~Device()
@@ -414,6 +418,11 @@ VkResult Device::createCommandPool()
     poolInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
     return vkCreateCommandPool(m_Device, &poolInfo, nullptr, &m_CommandPool);
+}
+
+void Device::getMemoryProperties()
+{
+    VkPhysicalDeviceMemoryProperties properties;
 }
 
 }; // namespace vrender

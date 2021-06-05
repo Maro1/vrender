@@ -42,6 +42,9 @@ public:
     inline const VkPhysicalDevice physicalDevice() const { return m_PhysicalDevice; }
     inline const VkCommandPool commandPool() const { return m_CommandPool; }
     inline const VkQueue graphicsQueue() const { return m_GraphicsQueue; }
+    inline VkDeviceSize memorySize() const { return m_MemorySize; };
+    inline const VkPhysicalDeviceMemoryProperties memoryProperties() const { return m_MemoryProperties; }
+    inline const VkPhysicalDeviceLimits limits() const { return m_Properties.limits; }
 
 private:
     int createVulkanInstance(const AppInfo& appInfo);
@@ -69,6 +72,8 @@ private:
     VkResult createSurface();
     VkResult createCommandPool();
 
+    void getMemoryProperties();
+
     VkInstance m_VulkanInstance;
     VkPhysicalDevice m_PhysicalDevice;
     VkDevice m_Device;
@@ -76,6 +81,10 @@ private:
     VkQueue m_PresentQueue;
     VkCommandPool m_CommandPool;
     VkSurfaceKHR m_Surface; // TODO: Move out of this class
+    VkDeviceSize m_MemorySize;
+
+    VkPhysicalDeviceMemoryProperties m_MemoryProperties;
+    VkPhysicalDeviceProperties m_Properties;
 
     Window* m_Window;
 

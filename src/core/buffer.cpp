@@ -1,12 +1,14 @@
 #include "buffer.h"
+#include "core/graphics_context.h"
 #include "utils/log.h"
 #include <vulkan/vulkan_core.h>
 
 namespace vrender
 {
 
-Buffer::Buffer(Device* device, const BufferInfo& bufferInfo) : m_Device(device)
+Buffer::Buffer(const BufferInfo& bufferInfo)
 {
+    m_Device = GraphicsContext::get().device();
     createBuffer(bufferInfo, m_Buffer, m_Memory);
 }
 

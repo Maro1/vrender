@@ -4,13 +4,8 @@
 namespace vrender
 {
 
-bool MemoryChunk::allocateChunk(const Device& device, VkDeviceSize size, uint32_t memoryTypeIndex)
+MemoryAllocation::MemoryAllocation(Device* device, VkDeviceSize size, uint32_t memoryTypeIndex)
 {
-    if ((size & (size - 1)) != 0 || size == 0)
-    {
-        V_LOG_ERROR("Chunk size must be a power of two.");
-        return false;
-    }
     MemoryBlock initialBlock;
     initialBlock.size = size;
     initialBlock.free = true;
@@ -20,26 +15,26 @@ bool MemoryChunk::allocateChunk(const Device& device, VkDeviceSize size, uint32_
     allocInfo.allocationSize = size;
     allocInfo.memoryTypeIndex = memoryTypeIndex;
 
-    VkResult result = vkAllocateMemory(device.device(), &allocInfo, nullptr, &m_Memory);
+    VkResult result = vkAllocateMemory(device->device(), &allocInfo, nullptr, &m_Memory);
     if (result != VK_SUCCESS)
     {
-        return false;
+        V_LOG_ERROR("Unable to allocate memory, error code: {}", result);
+        return;
     }
 
     initialBlock.memory = m_Memory;
 
     VkPhysicalDeviceMemoryProperties memoryProperties;
-    vkGetPhysicalDeviceMemoryProperties(device.physicalDevice(), &memoryProperties);
+    vkGetPhysicalDeviceMemoryProperties(device->physicalDevice(), &memoryProperties);
 
     if ((memoryProperties.memoryTypes[memoryTypeIndex].propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) ==
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
-        vkMapMemory(device.device(), m_Memory, initialBlock.offset, VK_WHOLE_SIZE, 0, &m_Ptr);
+        vkMapMemory(device->device(), m_Memory, initialBlock.offset, VK_WHOLE_SIZE, 0, &m_Ptr);
 
     m_Blocks.push_back(initialBlock);
-    return true;
 }
 
-bool MemoryChunk::freeBlock(const MemoryBlock& block)
+bool MemoryAllocation::freeBlock(const MemoryBlock& block)
 {
     auto b = std::find(m_Blocks.begin(), m_Blocks.end(), block);
     if (b == m_Blocks.end())
@@ -48,7 +43,7 @@ bool MemoryChunk::freeBlock(const MemoryBlock& block)
     return true;
 }
 
-bool MemoryChunk::allocateBlock(VkDeviceSize size, MemoryBlock& rblock)
+bool MemoryAllocation::allocateBlock(VkDeviceSize size, MemoryBlock& rblock)
 {
     if (size > m_Size)
         return false;
@@ -84,9 +79,31 @@ bool MemoryChunk::allocateBlock(VkDeviceSize size, MemoryBlock& rblock)
     return false;
 }
 
-MemoryAllocator::MemoryAllocator(Device* device, VkDeviceSize size) : m_Device(device) {}
+DeviceMemoryAllocator::DeviceMemoryAllocator(Device* device, VkDeviceSize size) : m_Device(device)
+{
+    m_MemoryProperties = m_Device->memoryProperties();
+    m_PageSize = m_Device->limits().bufferImageGranularity;
+    m_MinimumAllocationSize = m_PageSize * 10;
 
-uint64_t MemoryAllocator::nextPowerOfTwo(uint64_t num)
+    m_Allocations.resize(m_MemoryProperties.memoryTypeCount);
+
+    m_MemoryTypes.resize(m_MemoryProperties.memoryTypeCount);
+    for (unsigned int i = 0; i < m_MemoryProperties.memoryTypeCount; i++)
+    {
+        m_MemoryTypes[i] = m_MemoryProperties.memoryTypes[i];
+    }
+
+    m_MemoryHeaps.resize(m_MemoryProperties.memoryHeapCount);
+    for (unsigned int i = 0; i < m_MemoryProperties.memoryHeapCount; i++)
+    {
+        m_MemoryHeaps[i] = {};
+        m_MemoryHeaps[i].size = m_MemoryProperties.memoryHeaps[i].size;
+        m_MemoryHeaps[i].flags = m_MemoryProperties.memoryHeaps[i].flags;
+        m_MemoryHeaps[i].budgetSize = m_MemoryHeaps[i].size - (m_MemoryHeaps[i].size >> 2); // 75%
+    }
+}
+
+uint64_t DeviceMemoryAllocator::nextPowerOfTwo(uint64_t num)
 {
     num--;
     num |= num >> 1;
@@ -99,34 +116,62 @@ uint64_t MemoryAllocator::nextPowerOfTwo(uint64_t num)
     return num;
 }
 
-bool MemoryAllocator::allocate(VkDeviceSize size, uint32_t memoryTypeIndex, MemoryBlock& block)
+MemoryAllocation* DeviceMemoryAllocator::allocateNewMemory(VkDeviceSize size, uint32_t memoryTypeIndex)
 {
-    for (MemoryChunk& chunk : m_Chunks)
+    MemoryAllocation* allocation = m_Allocations[memoryTypeIndex];
+    VkDeviceSize allocSize;
+
+    if (!allocation)
     {
-        if (chunk.memoryTypeIndex() == memoryTypeIndex)
-        {
-            if (chunk.allocateBlock(size, block))
-                return true;
-        }
+        allocSize = size > m_MinimumAllocationSize ? size : m_MinimumAllocationSize;
+        MemoryAllocation* alloc = new MemoryAllocation(m_Device, allocSize, memoryTypeIndex);
+        m_Allocations[memoryTypeIndex] = alloc;
+        return alloc;
+    }
+    else
+    {
+        while (allocation != nullptr)
+            allocation = allocation->next();
+
+        allocSize = size > (allocation->size() * 2) ? size : allocation->size() * 2;
+
+        MemoryAllocation* alloc = new MemoryAllocation(m_Device, allocSize, memoryTypeIndex);
+        allocation->setNext(alloc);
+        return alloc;
+    }
+}
+
+MemoryAllocation* DeviceMemoryAllocator::findSuitableAllocation(VkDeviceSize size, uint32_t memoryTypeIndex)
+{
+    MemoryAllocation* allocation = m_Allocations[memoryTypeIndex];
+
+    if (!allocation)
+    {
+        // Initial allocation for this memory type
+        allocation = allocateNewMemory(size * 2, memoryTypeIndex);
+        return allocation;
     }
 
-    if (!isPowerOfTwo(size))
+    while (allocation->remainingSize() < size)
     {
-        size = nextPowerOfTwo(size);
+        allocation = allocation->next();
     }
 
-    uint64_t chunkSize = m_PreferredChunkSize;
-    while (chunkSize > size)
+    if (!allocation)
     {
-        MemoryChunk chunk;
-        if (chunk.allocateChunk(*m_Device, chunkSize, memoryTypeIndex))
-        {
-            if (chunk.allocateBlock(size, block))
-                return true;
-        }
-        chunkSize = chunkSize >> 2;
-    };
-    return false;
+        // No allocation has space, allocate new
+        allocation = allocateNewMemory(size * 2, memoryTypeIndex);
+    }
+
+    return allocation;
+}
+
+bool DeviceMemoryAllocator::allocate(VkDeviceSize size, uint32_t memoryTypeIndex, MemoryBlock& block)
+{
+    VkDeviceSize requestSize = ((size / m_PageSize) + 1) * m_PageSize;
+    MemoryAllocation* suitableAllocation = findSuitableAllocation(requestSize, memoryTypeIndex);
+
+    return suitableAllocation->allocateBlock(requestSize, block);
 }
 
 }; // namespace vrender

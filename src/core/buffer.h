@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/device.h"
+
 #include "glm/glm.hpp"
 #include <array>
 
@@ -44,7 +45,7 @@ struct BufferInfo
 class Buffer : private NonCopyable
 {
 public:
-    Buffer(Device* device, const BufferInfo& bufferInfo);
+    Buffer(const BufferInfo& bufferInfo);
 
     ~Buffer();
 
@@ -56,7 +57,7 @@ protected:
     Buffer(Device* device) : m_Device(device) {}
     bool createBuffer(const BufferInfo& bufferInfo, VkBuffer& buffer, VkDeviceMemory& memory);
 
-    Device* m_Device;
+    Device* m_Device = nullptr;
 
     VkBuffer m_Buffer;
     VkDeviceMemory m_Memory;
