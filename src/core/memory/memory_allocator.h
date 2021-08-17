@@ -32,6 +32,7 @@ public:
     bool allocate(const Device& device, VkDeviceSize size, uint32_t memoryTypeIndex);
 
     MemoryAllocation(Device* device, VkDeviceSize size, uint32_t memoryTypeIndex);
+    ~MemoryAllocation();
 
     bool allocateBlock(VkDeviceSize size, MemoryBlock& block);
     bool freeBlock(const MemoryBlock& block);
@@ -43,6 +44,7 @@ public:
     void setNext(MemoryAllocation* next) { m_Next = next; }
 
 private:
+    VkDevice m_Device;
     VkDeviceMemory m_Memory;
     VkDeviceSize m_Size;
     VkDeviceSize m_AllocatedSize = 0;
@@ -65,6 +67,7 @@ class DeviceMemoryAllocator : private NonCopyable
 {
 public:
     DeviceMemoryAllocator(Device* device, VkDeviceSize size);
+    ~DeviceMemoryAllocator();
 
     bool allocate(VkDeviceSize size, uint32_t memoryTypeIndex, MemoryBlock& block);
     void free(const MemoryBlock& block);

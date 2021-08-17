@@ -4,7 +4,8 @@
 namespace vrender
 {
 
-MemoryAllocation::MemoryAllocation(Device* device, VkDeviceSize size, uint32_t memoryTypeIndex) : m_Size(size)
+MemoryAllocation::MemoryAllocation(Device* device, VkDeviceSize size, uint32_t memoryTypeIndex)
+    : m_Device(device->device()), m_Size(size)
 {
     MemoryBlock initialBlock;
     initialBlock.typeIndex = memoryTypeIndex;
@@ -29,11 +30,12 @@ MemoryAllocation::MemoryAllocation(Device* device, VkDeviceSize size, uint32_t m
     VkPhysicalDeviceMemoryProperties memoryProperties;
     vkGetPhysicalDeviceMemoryProperties(device->physicalDevice(), &memoryProperties);
 
-    if ((memoryProperties.memoryTypes[memoryTypeIndex].propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) ==
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
-        vkMapMemory(device->device(), m_Memory, initialBlock.offset, VK_WHOLE_SIZE, 0, &m_Ptr);
-
     m_Blocks.push_back(initialBlock);
+}
+
+MemoryAllocation::~MemoryAllocation()
+{
+    vkFreeMemory(m_Device, m_Memory, nullptr);
 }
 
 bool MemoryAllocation::freeBlock(const MemoryBlock& block)
@@ -109,6 +111,21 @@ DeviceMemoryAllocator::DeviceMemoryAllocator(Device* device, VkDeviceSize size) 
     }
 }
 
+DeviceMemoryAllocator::~DeviceMemoryAllocator()
+{
+    for (const MemoryAllocation* alloc : m_Allocations)
+    {
+        const MemoryAllocation* next = alloc;
+        do
+        {
+            next = alloc->next();
+            delete alloc;
+            alloc = next;
+        }
+        while (next);
+    }
+}
+
 uint64_t DeviceMemoryAllocator::nextPowerOfTwo(uint64_t num)
 {
     num--;
@@ -136,7 +153,7 @@ MemoryAllocation* DeviceMemoryAllocator::allocateNewMemory(VkDeviceSize size, ui
     }
     else
     {
-        while (allocation != nullptr)
+        while (allocation->next() != nullptr)
             allocation = allocation->next();
 
         allocSize = size > (allocation->size() * 2) ? size : allocation->size() * 2;
@@ -158,7 +175,7 @@ MemoryAllocation* DeviceMemoryAllocator::findSuitableAllocation(VkDeviceSize siz
         return allocation;
     }
 
-    while (allocation->remainingSize() < size)
+    while (allocation && allocation->remainingSize() < size)
     {
         allocation = allocation->next();
     }
