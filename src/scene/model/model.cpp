@@ -11,7 +11,7 @@ void Model::draw(const VkCommandBuffer& commandBuffer)
 {
     for (auto& mesh : m_Meshes)
     {
-        mesh.draw(commandBuffer);
+        //mesh.draw(commandBuffer);
     }
 }
 }; // namespace vrender

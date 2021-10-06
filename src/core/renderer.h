@@ -7,6 +7,7 @@
 
 #include "scene/camera/arcball_camera.h"
 #include "scene/camera/camera.h"
+#include "scene/scene.h"
 
 #include "utils/noncopyable.h"
 
@@ -15,12 +16,23 @@
 namespace vrender
 {
 
+constexpr uint32_t FRAME_OVERLAP = 2;
+
 // TODO: Move somewhere else?
 struct MVP
 {
     glm::mat4 model;
     glm::mat4 view;
     glm::mat4 proj;
+};
+
+struct FrameData
+{
+    VkSemaphore presentSemaphore, renderSemaphore;
+    VkFence inFlightFence;
+
+    VkCommandPool commandPool;
+    VkCommandBuffer commandBuffer;
 };
 
 class Renderer : private NonCopyable
@@ -38,7 +50,7 @@ public:
     inline Pipeline& pipeline() { return m_Pipeline; }
     inline CameraController& cameraController() { return m_CameraController; }
 
-private:
+protected:
     void init();
 
     VkResult createCommandBuffers();
@@ -56,15 +68,12 @@ private:
     Camera m_Camera;
     ArcballCameraController m_CameraController;
 
-    std::vector<VkFence> m_InFlightFences;
     std::vector<VkCommandBuffer> m_CommandBuffers;
     uint32_t m_CurrentFrame = 0;
     uint32_t m_CurrentImage;
 
     std::vector<std::unique_ptr<VertexBuffer>> m_VertexBuffers;
     std::vector<std::unique_ptr<Buffer>> m_MVPBuffers;
-
-    std::vector<VkSemaphore> m_RenderFinishedSemaphores;
 
     const std::vector<Vertex> vertices = {
         {.position = glm::vec3(-0.5f, -0.5f, 0.0f)}, {.position = glm::vec3(0.5f, -0.5f, 0.0f)},
@@ -88,4 +97,21 @@ private:
                                            // top
                                            3, 2, 6, 6, 7, 3};
 };
+
+class WorldRenderer : public Renderer
+{
+public:
+    WorldRenderer(Device* device, World* world, SwapChain* swapChain, Window* window)
+        : Renderer(device, swapChain, window), m_World(world)
+    {
+    }
+
+    void render();
+
+private:
+    void drawWorld(VkCommandBuffer commandBuffer);
+
+    World* m_World;
+};
+
 }; // namespace vrender

@@ -85,7 +85,7 @@ void Renderer::beginRenderPass()
     renderPassInfo.renderArea = {0, 0};
     renderPassInfo.renderArea.extent = m_SwapChain->extent();
 
-    VkClearValue clearColor = {0.1f, 0.1f, 0.1f, 1.0f};
+    VkClearValue clearColor = {0.05f, 0.05f, 0.05f, 1.0f};
     renderPassInfo.clearValueCount = 1;
     renderPassInfo.pClearValues = &clearColor;
 
@@ -136,17 +136,10 @@ void Renderer::updateMVP()
     float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
     MVP mvp;
-    static bool yes = false;
-    if (!yes)
-    {
-        // m_Camera.rotate(glm::angleAxis(glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
-        yes = true;
-    }
-    // m_Camera.setPosition(glm::vec3(0.0f, 4.0f, 4.0f));
 
-    mvp.model = glm::mat4(1.0f); //
-    // mvp.model = glm::rotate(mvp.model, time * glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    // mvp.model = glm::translate(mvp.model, glm::vec3(0.0f, 0.0f, 0.0f));
+    mvp.model = glm::mat4(1.0f);
+    mvp.model = glm::rotate(mvp.model, time * glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    mvp.model = glm::translate(mvp.model, glm::vec3(0.0f, 0.0f, 0.0f));
     mvp.view = m_Camera.view();
     mvp.proj = m_Camera.projection();
     mvp.proj[1][1] *= -1;
@@ -191,4 +184,25 @@ void Renderer::populateDescriptors()
         vkUpdateDescriptorSets(m_Device->device(), 1, &descriptorWrite, 0, nullptr);
     }
 }
+
+void WorldRenderer::render()
+{
+    VkCommandBuffer commandBuffer = beginFrame();
+    beginRenderPass();
+    pipeline().bind(commandBuffer);
+    drawWorld(commandBuffer);
+    endRenderPass();
+    endFrame();
+}
+
+void WorldRenderer::drawWorld(VkCommandBuffer commandBuffer)
+{
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_Pipeline.layout(), 0, 1,
+                            &m_DescriptorPool.descriptorSets()[m_CurrentFrame], 0, nullptr);
+    for (const Mesh* mesh : m_World->meshes())
+    {
+        mesh->draw(commandBuffer);
+    }
+}
+
 }; // namespace vrender

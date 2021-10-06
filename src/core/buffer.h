@@ -50,7 +50,7 @@ public:
 
     ~Buffer();
 
-    void* copyData(void* src, size_t size);
+    void* copyData(void* src, size_t size, size_t offset = 0);
 
     inline const VkBuffer& buffer() const { return m_Buffer; }
 
@@ -62,6 +62,7 @@ protected:
 
     VkBuffer m_Buffer;
     MemoryBlock m_Memory;
+    VkDeviceSize m_Size;
 
 private:
     bool findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags flags, uint32_t& typeIndex);
@@ -94,4 +95,10 @@ private:
     VkBuffer m_IndexBuffer;
     MemoryBlock m_IndexMemory;
 };
+
+class UniformBuffer : public Buffer
+{
+    UniformBuffer(const BufferInfo& bufferInfo);
+};
+
 }; // namespace vrender

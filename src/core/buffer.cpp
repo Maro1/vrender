@@ -8,6 +8,7 @@ namespace vrender
 
 Buffer::Buffer(const BufferInfo& bufferInfo)
 {
+    m_Size = bufferInfo.size;
     m_Device = GraphicsContext::get().device();
     createBuffer(bufferInfo, m_Buffer, m_Memory);
 }
@@ -73,7 +74,7 @@ bool Buffer::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags flags, ui
     return false;
 }
 
-void* Buffer::copyData(void* src, size_t size)
+void* Buffer::copyData(void* src, size_t size, size_t offset)
 {
     void* data;
     vkMapMemory(m_Device->device(), m_Memory.memory, m_Memory.offset, size, 0, &data);
@@ -189,5 +190,24 @@ void VertexBuffer::bind(const VkCommandBuffer& commandBuffer) const
     VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
     vkCmdBindIndexBuffer(commandBuffer, m_IndexBuffer, 0, VK_INDEX_TYPE_UINT16);
+}
+
+UniformBuffer::UniformBuffer(const BufferInfo& bufferInfo) : Buffer(bufferInfo)
+{
+    VkDescriptorBufferInfo vkBufferInfo = {};
+    vkBufferInfo.buffer = m_Buffer;
+    vkBufferInfo.offset = 0;
+    vkBufferInfo.range = bufferInfo.size;
+
+    VkWriteDescriptorSet descriptorWrite = {};
+    descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrite.dstSet = nullptr; // m_DescriptorPool.descriptorSets()[i];
+    descriptorWrite.dstBinding = 0;
+    descriptorWrite.dstArrayElement = 0;
+    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    descriptorWrite.descriptorCount = 1;
+    descriptorWrite.pBufferInfo = &vkBufferInfo;
+
+    vkUpdateDescriptorSets(m_Device->device(), 1, &descriptorWrite, 0, nullptr);
 }
 }; // namespace vrender
