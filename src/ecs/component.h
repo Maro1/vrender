@@ -30,14 +30,14 @@ private:
 class Component
 {
 public:
-    virtual void start() = 0;
-    virtual void update() = 0;
+    virtual void start() {}
+    virtual void update() {}
 
     inline Entity* getEntity() { return m_Entity; };
     inline void setEntity(Entity* entity) { m_Entity = entity; }
 
 private:
-    Entity* m_Entity;
+    Entity* m_Entity = nullptr;
 };
 
 struct Transform : public Component

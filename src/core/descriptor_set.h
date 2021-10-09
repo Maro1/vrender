@@ -11,7 +11,7 @@ class DescriptorSetAllocator;
 class DescriptorPool : private NonCopyable
 {
 public:
-    DescriptorPool(Device* device, DescriptorSetAllocator*, unsigned int descriptorCount);
+    DescriptorPool(Device* device, DescriptorSetAllocator* allocator, unsigned int descriptorCount);
     ~DescriptorPool();
 
     inline const std::vector<VkDescriptorSet>& descriptorSets() const { return m_DescriptorSets; }

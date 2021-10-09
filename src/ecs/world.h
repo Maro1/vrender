@@ -23,6 +23,9 @@ public:
     inline void addMesh(Mesh* mesh) { m_Meshes.insert(mesh); }
     inline const std::unordered_set<Mesh*>& meshes() const { return m_Meshes; }
 
+    inline Camera* camera() const { return m_Camera.get(); }
+    void setCamera(std::unique_ptr<Camera> camera) { m_Camera = std::move(camera); }
+
 private:
     std::unordered_set<Entity*> m_Entities;
     std::unordered_set<Mesh*> m_Meshes;

@@ -19,6 +19,8 @@ public:
 
     template <typename T> void update(const std::string& name, const T& object);
 
+    Buffer* buffer() { return &m_UniformBuffer; }
+
 private:
     Buffer m_UniformBuffer;
     VkDeviceSize m_Size;

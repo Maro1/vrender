@@ -9,17 +9,14 @@ namespace vrender
 {
 
 Renderer::Renderer(Device* device, SwapChain* swapChain, Window* window)
-    : m_Device(device), m_SwapChain(swapChain), m_Window(window), m_DescriptorAllocator(device),
-      m_DescriptorPool(device, &m_DescriptorAllocator, swapChain->images().size()),
-      m_Pipeline(device, swapChain, m_DescriptorPool.allocator()), m_CameraController(&m_Camera)
+    : m_Device(device), m_SwapChain(swapChain), m_Window(window), m_Pipeline(device, swapChain),
+      m_Camera(std::unique_ptr<Camera>(new Camera())), m_CameraController(m_Camera.get())
 {
     std::unique_ptr<VertexBuffer> cube = std::make_unique<VertexBuffer>(m_Device, &vertices, &indices);
     m_VertexBuffers.push_back(std::move(cube));
-    createMVPBuffers();
-    populateDescriptors();
     init();
-    m_Camera.setAspectRatio((float)m_SwapChain->extent().width / (float)m_SwapChain->extent().height);
-    m_Camera.setPosition(glm::vec3(0.0f, 0.0f, 4.0f));
+    m_Camera->setAspectRatio((float)m_SwapChain->extent().width / (float)m_SwapChain->extent().height);
+    m_Camera->setPosition(glm::vec3(0.0f, 0.0f, 4.0f));
 }
 
 Renderer::~Renderer() {}
@@ -59,8 +56,6 @@ VkResult Renderer::endFrame()
     VkResult commandResult = vkEndCommandBuffer(commandBuffer);
     if (commandResult != VK_SUCCESS)
         return commandResult;
-
-    updateMVP();
 
     VkResult queuePresentResult = m_SwapChain->submitCommandBuffers(&m_CommandBuffers[m_CurrentFrame], m_CurrentImage);
 
@@ -123,9 +118,7 @@ VkResult Renderer::createCommandBuffers()
 void Renderer::draw(const VkCommandBuffer& commandBuffer)
 {
     m_VertexBuffers[0]->bind(commandBuffer);
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_Pipeline.layout(), 0, 1,
-                            &m_DescriptorPool.descriptorSets()[m_CurrentFrame], 0, nullptr);
-    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(m_VertexBuffers[0]->indices()->size()), 1, 0, 0, 0);
+    // vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(m_VertexBuffers[0]->indices()->size()), 1, 0, 0, 0);
 }
 
 void Renderer::updateMVP()
@@ -137,56 +130,17 @@ void Renderer::updateMVP()
 
     MVP mvp;
 
-    mvp.model = glm::mat4(1.0f);
-    mvp.model = glm::rotate(mvp.model, time * glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    mvp.model = glm::translate(mvp.model, glm::vec3(0.0f, 0.0f, 0.0f));
-    mvp.view = m_Camera.view();
-    mvp.proj = m_Camera.projection();
-    mvp.proj[1][1] *= -1;
-
     void* data = m_MVPBuffers[m_CurrentImage]->copyData((void*)&mvp, sizeof(mvp));
-}
-
-void Renderer::createMVPBuffers()
-{
-    VkDeviceSize bufferSize = sizeof(MVP);
-
-    BufferInfo bufferInfo;
-    bufferInfo.size = bufferSize;
-    bufferInfo.memoryProperties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-    bufferInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-
-    for (unsigned int i = 0; i < m_SwapChain->images().size(); i++)
-    {
-        std::unique_ptr<Buffer> buffer = std::make_unique<Buffer>(bufferInfo);
-        m_MVPBuffers.push_back(std::move(buffer));
-    }
-}
-
-void Renderer::populateDescriptors()
-{
-    for (unsigned int i = 0; i < m_SwapChain->images().size(); i++)
-    {
-        VkDescriptorBufferInfo bufferInfo = {};
-        bufferInfo.buffer = m_MVPBuffers[i]->buffer();
-        bufferInfo.offset = 0;
-        bufferInfo.range = sizeof(MVP);
-
-        VkWriteDescriptorSet descriptorWrite = {};
-        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrite.dstSet = m_DescriptorPool.descriptorSets()[i];
-        descriptorWrite.dstBinding = 0;
-        descriptorWrite.dstArrayElement = 0;
-        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        descriptorWrite.descriptorCount = 1;
-        descriptorWrite.pBufferInfo = &bufferInfo;
-
-        vkUpdateDescriptorSets(m_Device->device(), 1, &descriptorWrite, 0, nullptr);
-    }
 }
 
 void WorldRenderer::render()
 {
+    // TODO: Replace with world.update() which should update all components and not be called from here
+    for (Mesh* mesh : m_World->meshes())
+    {
+        mesh->update();
+    }
+
     VkCommandBuffer commandBuffer = beginFrame();
     beginRenderPass();
     pipeline().bind(commandBuffer);
@@ -197,11 +151,9 @@ void WorldRenderer::render()
 
 void WorldRenderer::drawWorld(VkCommandBuffer commandBuffer)
 {
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_Pipeline.layout(), 0, 1,
-                            &m_DescriptorPool.descriptorSets()[m_CurrentFrame], 0, nullptr);
     for (const Mesh* mesh : m_World->meshes())
     {
-        mesh->draw(commandBuffer);
+        mesh->draw(commandBuffer, m_Pipeline, m_CurrentFrame);
     }
 }
 

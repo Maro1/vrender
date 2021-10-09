@@ -20,10 +20,15 @@ public:
 
     template <typename T> bool hasComponent() const { return (m_ComponentSet & ComponentTypeIDMap::getID<T>()) != 0; }
 
-    template <typename T> void addComponent();
+    template <typename T> void addComponent()
+    {
+        m_ComponentSet |= ComponentTypeIDMap::getID<T>();
+        addComponent(std::make_unique<T>());
+    }
 
     template <typename T, typename... Args> void addComponent(Args&&... args)
     {
+        m_ComponentSet |= ComponentTypeIDMap::getID<T>();
         addComponent(std::make_unique<T>(std::forward<Args>(args)...));
     }
 

@@ -23,12 +23,6 @@ Entity::~Entity()
     Entity::m_FreeIDs.push(m_ID);
 }
 
-template <typename T> void Entity::addComponent()
-{
-    m_ComponentSet |= ComponentTypeIDMap::getID<T>();
-    addComponent(std::make_unique<T>());
-}
-
 void Entity::addComponent(std::unique_ptr<Component>&& component)
 {
     component->setEntity(this);

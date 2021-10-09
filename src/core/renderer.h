@@ -16,16 +16,6 @@
 namespace vrender
 {
 
-constexpr uint32_t FRAME_OVERLAP = 2;
-
-// TODO: Move somewhere else?
-struct MVP
-{
-    glm::mat4 model;
-    glm::mat4 view;
-    glm::mat4 proj;
-};
-
 struct FrameData
 {
     VkSemaphore presentSemaphore, renderSemaphore;
@@ -54,18 +44,14 @@ protected:
     void init();
 
     VkResult createCommandBuffers();
-    void createMVPBuffers();
     void updateMVP();
-    void populateDescriptors();
 
     Device* m_Device;
     SwapChain* m_SwapChain;
     Window* m_Window;
 
-    DescriptorSetAllocator m_DescriptorAllocator;
-    DescriptorPool m_DescriptorPool;
     Pipeline m_Pipeline;
-    Camera m_Camera;
+    std::unique_ptr<Camera> m_Camera;
     ArcballCameraController m_CameraController;
 
     std::vector<VkCommandBuffer> m_CommandBuffers;
@@ -104,6 +90,7 @@ public:
     WorldRenderer(Device* device, World* world, SwapChain* swapChain, Window* window)
         : Renderer(device, swapChain, window), m_World(world)
     {
+        m_World->setCamera(std::move(m_Camera));
     }
 
     void render();

@@ -44,9 +44,17 @@ int VRender::run()
     V_LOG_INFO("Started VRender application.");
 
     Entity* entity = GraphicsContext::get().world()->createEntity();
-    Mesh mesh(GraphicsContext::get().device(), GraphicsContext::get().world(), vertices, indices);
 
-    entity->addComponent<Mesh>(GraphicsContext::get().device(), GraphicsContext::get().world(), vertices, indices);
+    entity->addComponent<Mesh>(GraphicsContext::get().device(), vertices, indices, entity->world());
+    entity->addComponent<Transform>();
+
+    Entity* entity2 = GraphicsContext::get().world()->createEntity();
+
+    entity2->addComponent<Mesh>(GraphicsContext::get().device(), vertices, indices, entity->world());
+
+    Transform tf;
+    tf.position = glm::vec3(-2.0f, 0.0f, 0.0f);
+    entity2->addComponent<Transform>(tf);
 
     while (!GraphicsContext::get().window()->shouldClose())
     {

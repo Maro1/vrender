@@ -4,12 +4,12 @@
 
 namespace vrender
 {
-Pipeline::Pipeline(Device* device, SwapChain* swapChain, DescriptorSetAllocator* descriptorSetAllocator)
-    : m_Device(device), m_SwapChain(swapChain),
+Pipeline::Pipeline(Device* device, SwapChain* swapChain)
+    : m_Device(device), m_SwapChain(swapChain), m_DescriptorSetAllocator(device),
+      m_DescriptorPool(device, &m_DescriptorSetAllocator, swapChain->images().size()),
       m_Shader(device, "shader_bin/triangle.vert.spv", "shader_bin/triangle.frag.spv")
 {
-    m_DescriptorSetAllocator = descriptorSetAllocator;
-    m_DescriptorSetLayout = m_DescriptorSetAllocator->layout();
+    m_DescriptorSetLayout = m_DescriptorSetAllocator.layout();
     createGraphicsPipeline();
 }
 
