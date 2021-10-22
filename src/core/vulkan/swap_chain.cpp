@@ -1,6 +1,6 @@
-#include "swap_chain.h"
+#include "swap_chain.hpp"
 
-#include "core/pipeline.h"
+#include "core/vulkan/pipeline.hpp"
 
 #include <algorithm>
 #include <cstdint>

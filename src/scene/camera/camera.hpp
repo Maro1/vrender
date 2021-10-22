@@ -1,7 +1,7 @@
 #pragma once
 
-#include "app/events/events.h"
-#include "app/key_codes.h"
+#include "app/events/events.hpp"
+#include "app/key_codes.hpp"
 #include "glm/glm.hpp"
 #include "glm/gtc/quaternion.hpp"
 #include "glm/gtx/quaternion.hpp"

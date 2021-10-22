@@ -1,6 +1,6 @@
-#include "buffer.h"
-#include "core/graphics_context.h"
-#include "utils/log.h"
+#include "buffer.hpp"
+#include "core/graphics_context.hpp"
+#include "utils/log.hpp"
 #include <vulkan/vulkan_core.h>
 
 namespace vrender
@@ -84,7 +84,7 @@ void* Buffer::copyData(void* src, size_t size, size_t offset)
 }
 
 // ----------- VVertexBuffer --------------
-VertexBuffer::VertexBuffer(Device* device, const std::vector<Vertex>* vertices, const std::vector<uint16_t>* indices)
+VertexBuffer::VertexBuffer(Device* device, std::vector<Vertex> vertices, std::vector<uint16_t> indices)
     : Buffer(device), m_Vertices(vertices), m_Indices(indices)
 {
     createVertexBuffer();
@@ -100,7 +100,7 @@ VertexBuffer::~VertexBuffer()
 void VertexBuffer::createVertexBuffer()
 {
     BufferInfo bufferInfo = {};
-    bufferInfo.size = m_Vertices->size() * sizeof(Vertex);
+    bufferInfo.size = m_Vertices.size() * sizeof(Vertex);
     bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
     bufferInfo.memoryProperties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 
@@ -108,10 +108,10 @@ void VertexBuffer::createVertexBuffer()
 
     void* data;
     vkMapMemory(m_Device->device(), m_StagingMemory.memory, m_StagingMemory.offset, bufferInfo.size, 0, &data);
-    memcpy(data, m_Vertices->data(), (size_t)bufferInfo.size);
+    memcpy(data, m_Vertices.data(), (size_t)bufferInfo.size);
     vkUnmapMemory(m_Device->device(), m_StagingMemory.memory);
 
-    bufferInfo.size = m_Vertices->size() * sizeof(Vertex);
+    bufferInfo.size = m_Vertices.size() * sizeof(Vertex);
     bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
     bufferInfo.memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
@@ -125,7 +125,7 @@ void VertexBuffer::createVertexBuffer()
 void VertexBuffer::createIndexBuffer()
 {
     BufferInfo bufferInfo = {};
-    bufferInfo.size = m_Indices->size() * sizeof(uint16_t);
+    bufferInfo.size = m_Indices.size() * sizeof(uint16_t);
     bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
     bufferInfo.memoryProperties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 
@@ -133,10 +133,10 @@ void VertexBuffer::createIndexBuffer()
 
     void* data;
     vkMapMemory(m_Device->device(), m_StagingMemory.memory, m_StagingMemory.offset, bufferInfo.size, 0, &data);
-    memcpy(data, m_Indices->data(), (size_t)bufferInfo.size);
+    memcpy(data, m_Indices.data(), (size_t)bufferInfo.size);
     vkUnmapMemory(m_Device->device(), m_StagingMemory.memory);
 
-    bufferInfo.size = m_Indices->size() * sizeof(uint16_t);
+    bufferInfo.size = m_Indices.size() * sizeof(uint16_t);
     bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
     bufferInfo.memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 

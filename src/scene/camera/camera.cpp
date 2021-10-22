@@ -1,7 +1,7 @@
-#include "camera.h"
+#include "camera.hpp"
 
-#include "app/events/key_events.h"
-#include "app/events/mouse_events.h"
+#include "app/events/key_events.hpp"
+#include "app/events/mouse_events.hpp"
 
 namespace vrender
 {

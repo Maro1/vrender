@@ -1,7 +1,6 @@
-#include "app/vrender.h"
-#include "core/graphics_context.h"
-#include "utils/log.h"
-#include "ecs/world.h"
+#include "app/vrender.hpp"
+#include "core/graphics_context.hpp"
+#include "utils/log.hpp"
 
 int main()
 {

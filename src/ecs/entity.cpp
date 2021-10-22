@@ -1,11 +1,11 @@
-#include "entity.h"
+#include "entity.hpp"
 
 std::uint64_t vrender::Entity::m_NumEntities{0};
 std::queue<uint64_t> vrender::Entity::m_FreeIDs{};
 
 namespace vrender
 {
-Entity::Entity(World* world) : m_World(world)
+Entity::Entity(Scene* world) : m_World(world)
 {
     if (!Entity::m_FreeIDs.empty())
     {

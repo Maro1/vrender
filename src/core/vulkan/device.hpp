@@ -6,8 +6,8 @@
 #define GLFW_INCLUDE_VULKAN
 #include "GLFW/glfw3.h"
 
-#include "app/window.h"
-#include "utils/noncopyable.h"
+#include "app/window.hpp"
+#include "utils/noncopyable.hpp"
 
 namespace vrender
 {

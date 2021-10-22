@@ -1,7 +1,7 @@
 #pragma once
 
-#include "core/device.h"
-#include "core/memory/memory_allocator.h"
+#include "core/memory/memory_allocator.hpp"
+#include "core/vulkan/device.hpp"
 
 #include "glm/glm.hpp"
 #include <array>
@@ -71,14 +71,14 @@ private:
 class VertexBuffer : public Buffer
 {
 public:
-    VertexBuffer(Device* device, const std::vector<Vertex>* vertices, const std::vector<uint16_t>* indices);
+    VertexBuffer(Device* device, std::vector<Vertex> vertices, std::vector<uint16_t> indices);
     ~VertexBuffer();
 
     // TODO: Change if can bind multiple at a time
     void bind(const VkCommandBuffer& commandBuffer) const;
 
-    inline const std::vector<Vertex>* vertices() const { return m_Vertices; }
-    inline const std::vector<uint16_t>* indices() const { return m_Indices; }
+    inline std::vector<Vertex> vertices() const { return m_Vertices; }
+    inline std::vector<uint16_t> indices() const { return m_Indices; }
     inline const VkBuffer& indexBuffer() const { return m_IndexBuffer; }
 
 private:
@@ -86,8 +86,8 @@ private:
     void createIndexBuffer();
     void copyBuffer(const VkBuffer& dstBuffer, VkDeviceSize size);
 
-    const std::vector<Vertex>* m_Vertices;
-    const std::vector<uint16_t>* m_Indices;
+    std::vector<Vertex> m_Vertices;
+    std::vector<uint16_t> m_Indices;
 
     VkBuffer m_StagingBuffer;
     MemoryBlock m_StagingMemory;

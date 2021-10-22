@@ -1,7 +1,7 @@
-#include "window.h"
+#include "window.hpp"
 
-#include "events/key_events.h"
-#include "events/mouse_events.h"
+#include "events/key_events.hpp"
+#include "events/mouse_events.hpp"
 
 namespace vrender
 {

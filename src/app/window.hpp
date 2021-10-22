@@ -1,8 +1,8 @@
 #pragma once
 
-#include "app/key_codes.h"
-#include "events/events.h"
-#include "utils/noncopyable.h"
+#include "app/key_codes.hpp"
+#include "events/events.hpp"
+#include "utils/noncopyable.hpp"
 
 #define GLFW_INCLUDE_VULKAN
 #include "GLFW/glfw3.h"

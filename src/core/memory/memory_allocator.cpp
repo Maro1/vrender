@@ -1,5 +1,5 @@
-#include "memory_allocator.h"
-#include "utils/log.h"
+#include "memory_allocator.hpp"
+#include "utils/log.hpp"
 
 namespace vrender
 {
@@ -121,8 +121,7 @@ DeviceMemoryAllocator::~DeviceMemoryAllocator()
             next = alloc->next();
             delete alloc;
             alloc = next;
-        }
-        while (next);
+        } while (next);
     }
 }
 

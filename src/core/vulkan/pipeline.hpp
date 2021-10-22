@@ -1,10 +1,10 @@
 #pragma once
 
-#include "core/descriptor_set.h"
-#include "core/shader.h"
-#include "core/swap_chain.h"
+#include "core/vulkan/descriptor_set.hpp"
+#include "core/vulkan/shader.hpp"
+#include "core/vulkan/swap_chain.hpp"
 
-#include "utils/noncopyable.h"
+#include "utils/noncopyable.hpp"
 
 namespace vrender
 {

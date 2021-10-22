@@ -1,6 +1,6 @@
 #pragma once
 
-#include "component.h"
+#include "component.hpp"
 
 #include <bitset>
 #include <memory>
@@ -9,12 +9,12 @@
 namespace vrender
 {
 
-class World;
+class Scene;
 
 class Entity
 {
 public:
-    Entity(World* world);
+    Entity(Scene* world);
 
     ~Entity();
 
@@ -49,18 +49,18 @@ public:
         return nullptr;
     }
 
-    inline std::uint64_t ID() const { return m_ID; }
-
-    inline World* world() const { return m_World; }
-
-private:
     void addComponent(std::unique_ptr<Component>&& component);
 
-    uint64_t m_ComponentSet;
+    inline std::uint64_t ID() const { return m_ID; }
+
+    inline Scene* world() const { return m_World; }
+
+private:
+    uint64_t m_ComponentSet = 0;
     std::vector<std::unique_ptr<Component>> m_Components;
     std::uint64_t m_ID;
 
-    World* m_World;
+    Scene* m_World;
 
     static std::uint64_t m_NumEntities;
     static std::queue<uint64_t> m_FreeIDs;

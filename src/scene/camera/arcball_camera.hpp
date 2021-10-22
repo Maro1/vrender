@@ -1,7 +1,7 @@
 #pragma once
 
-#include "app/key_codes.h"
-#include "camera.h"
+#include "app/key_codes.hpp"
+#include "camera.hpp"
 #include <bitset>
 
 namespace vrender

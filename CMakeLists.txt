@@ -48,6 +48,9 @@ endif()
 # spdlog
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/spdlog)
 
+# assimp
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/assimp)
+
 # GLFW
 option(GLFW_BUILD_DOCS OFF)
 option(GLFW_BUILD_TESTS OFF)
@@ -60,6 +63,7 @@ target_link_libraries(${BINARY_NAME} glm)
 target_link_libraries(${BINARY_NAME} spdlog)
 target_link_libraries(${BINARY_NAME} glfw)
 target_link_libraries(${BINARY_NAME} vulkan)
+target_link_libraries(${BINARY_NAME} assimp)
 
 # Compile shaders
 find_program(GLSLC glslc)

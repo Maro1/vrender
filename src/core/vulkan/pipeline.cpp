@@ -1,6 +1,6 @@
-#include "pipeline.h"
+#include "pipeline.hpp"
 
-#include "core/buffer.h"
+#include "core/vulkan/buffer.hpp"
 
 namespace vrender
 {

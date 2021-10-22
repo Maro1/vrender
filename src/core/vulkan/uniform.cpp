@@ -1,4 +1,4 @@
-#include "uniform.h"
+#include "uniform.hpp"
 
 namespace vrender
 {

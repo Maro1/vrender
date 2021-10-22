@@ -1,7 +1,7 @@
 #pragma once
 
-#include "core/device.h"
-#include "utils/noncopyable.h"
+#include "core/vulkan/device.hpp"
+#include "utils/noncopyable.hpp"
 
 #include "vulkan/vulkan.h"
 

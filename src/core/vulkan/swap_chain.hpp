@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/device.h"
+#include "core/vulkan/device.hpp"
 #include <memory>
 
 namespace vrender

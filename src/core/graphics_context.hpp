@@ -1,12 +1,12 @@
 #pragma once
 
-#include "app/vrender.h"
-#include "app/window.h"
-#include "core/device.h"
-#include "core/memory/memory_allocator.h"
-#include "core/renderer.h"
-#include "core/swap_chain.h"
-#include "utils/noncopyable.h"
+#include "app/vrender.hpp"
+#include "app/window.hpp"
+#include "core/memory/memory_allocator.hpp"
+#include "core/renderer.hpp"
+#include "core/vulkan/device.hpp"
+#include "core/vulkan/swap_chain.hpp"
+#include "utils/noncopyable.hpp"
 
 #include <memory>
 
@@ -28,7 +28,7 @@ public:
         m_Device = std::make_unique<Device>(VRender::appInfo(), m_Window.get());
         m_MemoryAllocator = std::make_unique<DeviceMemoryAllocator>(device(), device()->memorySize());
         m_SwapChain = std::make_unique<SwapChain>(m_Device.get(), m_Window.get());
-        m_World = std::make_unique<World>();
+        m_World = std::make_unique<Scene>();
         m_Renderer = std::make_unique<WorldRenderer>(m_Device.get(), m_World.get(), m_SwapChain.get(), m_Window.get());
     }
 
@@ -37,7 +37,7 @@ public:
     inline Window* window() const { return m_Window.get(); }
     inline SwapChain* swapChain() const { return m_SwapChain.get(); }
     inline DeviceMemoryAllocator* deviceMemoryAllocator() const { return m_MemoryAllocator.get(); }
-    inline World* world() const { return m_World.get(); }
+    inline Scene* world() const { return m_World.get(); }
 
 protected:
     static bool create();
@@ -51,6 +51,6 @@ private:
     std::unique_ptr<SwapChain> m_SwapChain;
     std::unique_ptr<DeviceMemoryAllocator> m_MemoryAllocator;
     std::unique_ptr<Renderer> m_Renderer;
-    std::unique_ptr<World> m_World;
+    std::unique_ptr<Scene> m_World;
 };
 }; // namespace vrender

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "buffer.h"
+#include "buffer.hpp"
 #include <unordered_map>
 
 namespace vrender

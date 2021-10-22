@@ -1,13 +1,13 @@
 #pragma once
 
-#include "app/window.h"
-#include "core/device.h"
-#include "core/pipeline.h"
-#include "core/renderer.h"
+#include "app/window.hpp"
+#include "core/renderer.hpp"
+#include "core/vulkan/device.hpp"
+#include "core/vulkan/pipeline.hpp"
 
-#include "events/key_events.h"
-#include "utils/log.h"
-#include "utils/noncopyable.h"
+#include "events/key_events.hpp"
+#include "utils/log.hpp"
+#include "utils/noncopyable.hpp"
 
 namespace vrender
 {

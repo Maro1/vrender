@@ -1,7 +1,7 @@
-#include "device.h"
+#include "device.hpp"
 
-#include "app/vrender.h"
-#include "utils/log.h"
+#include "app/vrender.hpp"
+#include "utils/log.hpp"
 
 #include <algorithm>
 #include <iostream>

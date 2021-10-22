@@ -1,4 +1,6 @@
-#include "renderer.h"
+#include "renderer.hpp"
+
+#include "scene/model/mesh.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -12,8 +14,6 @@ Renderer::Renderer(Device* device, SwapChain* swapChain, Window* window)
     : m_Device(device), m_SwapChain(swapChain), m_Window(window), m_Pipeline(device, swapChain),
       m_Camera(std::unique_ptr<Camera>(new Camera())), m_CameraController(m_Camera.get())
 {
-    std::unique_ptr<VertexBuffer> cube = std::make_unique<VertexBuffer>(m_Device, &vertices, &indices);
-    m_VertexBuffers.push_back(std::move(cube));
     init();
     m_Camera->setAspectRatio((float)m_SwapChain->extent().width / (float)m_SwapChain->extent().height);
     m_Camera->setPosition(glm::vec3(0.0f, 0.0f, 4.0f));
@@ -115,30 +115,16 @@ VkResult Renderer::createCommandBuffers()
     return vkAllocateCommandBuffers(m_Device->device(), &allocInfo, m_CommandBuffers.data());
 }
 
-void Renderer::draw(const VkCommandBuffer& commandBuffer)
-{
-    m_VertexBuffers[0]->bind(commandBuffer);
-    // vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(m_VertexBuffers[0]->indices()->size()), 1, 0, 0, 0);
-}
-
-void Renderer::updateMVP()
-{
-    static auto startTime = std::chrono::high_resolution_clock::now();
-
-    auto currentTime = std::chrono::high_resolution_clock::now();
-    float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-
-    MVP mvp;
-
-    void* data = m_MVPBuffers[m_CurrentImage]->copyData((void*)&mvp, sizeof(mvp));
-}
-
 void WorldRenderer::render()
 {
     // TODO: Replace with world.update() which should update all components and not be called from here
-    for (Mesh* mesh : m_World->meshes())
+    for (Entity* entity : m_World->entities())
     {
-        mesh->update();
+        if (entity->hasComponent<Mesh>())
+        {
+            Mesh* mesh = entity->getComponent<Mesh>();
+            mesh->update();
+        }
     }
 
     VkCommandBuffer commandBuffer = beginFrame();
@@ -151,9 +137,13 @@ void WorldRenderer::render()
 
 void WorldRenderer::drawWorld(VkCommandBuffer commandBuffer)
 {
-    for (const Mesh* mesh : m_World->meshes())
+    for (Entity* entity : m_World->entities())
     {
-        mesh->draw(commandBuffer, m_Pipeline, m_CurrentFrame);
+        if (entity->hasComponent<Mesh>())
+        {
+            Mesh* mesh = entity->getComponent<Mesh>();
+            mesh->draw(commandBuffer, m_Pipeline, m_CurrentFrame);
+        }
     }
 }
 

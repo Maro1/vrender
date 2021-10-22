@@ -1,7 +1,7 @@
 #pragma once
 
-#include "app/key_codes.h"
-#include "utils/noncopyable.h"
+#include "app/key_codes.hpp"
+#include "utils/noncopyable.hpp"
 
 #include <bitset>
 #include <vector>

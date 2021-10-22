@@ -1,12 +1,12 @@
 
 #pragma once
 
-#include "core/buffer.h"
-#include "core/pipeline.h"
-#include "core/uniform.h"
+#include "core/vulkan/buffer.hpp"
+#include "core/vulkan/pipeline.hpp"
+#include "core/vulkan/uniform.hpp"
 
-#include "ecs/component.h"
-#include "ecs/world.h"
+#include "ecs/component.hpp"
+#include "scene/scene.hpp"
 
 namespace vrender
 {
@@ -25,14 +25,16 @@ struct MVP
 class Mesh : public Component
 {
 public:
-    Mesh(Device* device, const std::vector<Vertex>& vertices, const std::vector<uint16_t>& indices,
-         World* world = nullptr);
+    Mesh(Device* device, std::vector<Vertex> vertices, std::vector<uint16_t> indices);
+    Mesh(Device* device, const std::string& filepath);
     ~Mesh();
 
     void start() override {}
     void update() override;
 
     void draw(const VkCommandBuffer& commandBuffer, const Pipeline& pipeline, uint32_t frameIndex) const;
+
+    static std::pair<std::vector<Vertex>, std::vector<uint16_t>> loadFromFile(const std::string& filepath);
 
 private:
     VertexBuffer m_VertexBuffer;

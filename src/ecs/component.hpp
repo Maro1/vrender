@@ -43,7 +43,7 @@ private:
 struct Transform : public Component
 {
     glm::vec3 position;
-    glm::vec3 scale;
+    glm::vec3 scale = glm::vec3(1.0f);
     glm::quat rotation;
 };
 

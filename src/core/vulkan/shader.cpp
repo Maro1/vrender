@@ -1,5 +1,5 @@
-#include "shader.h"
-#include "utils/log.h"
+#include "shader.hpp"
+#include "utils/log.hpp"
 
 #include <cstddef>
 #include <fstream>

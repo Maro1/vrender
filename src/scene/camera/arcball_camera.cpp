@@ -1,4 +1,4 @@
-#include "arcball_camera.h"
+#include "arcball_camera.hpp"
 
 #include "GLFW/glfw3.h"
 #include "glm/ext/quaternion_trigonometric.hpp"
@@ -7,7 +7,7 @@
 #include "glm/gtx/rotate_vector.hpp"
 
 #include "glm/gtx/transform.hpp"
-#include "utils/log.h"
+#include "utils/log.hpp"
 
 namespace vrender
 {
