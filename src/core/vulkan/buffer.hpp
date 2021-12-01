@@ -98,6 +98,7 @@ private:
 
 class UniformBuffer : public Buffer
 {
+public:
     UniformBuffer(const BufferInfo& bufferInfo);
 };
 

@@ -3,7 +3,7 @@
 #include "app/vrender.hpp"
 #include "app/window.hpp"
 #include "core/memory/memory_allocator.hpp"
-#include "core/renderer.hpp"
+#include "core/rendering/renderer.hpp"
 #include "core/vulkan/device.hpp"
 #include "core/vulkan/swap_chain.hpp"
 #include "utils/noncopyable.hpp"
@@ -29,7 +29,7 @@ public:
         m_MemoryAllocator = std::make_unique<DeviceMemoryAllocator>(device(), device()->memorySize());
         m_SwapChain = std::make_unique<SwapChain>(m_Device.get(), m_Window.get());
         m_World = std::make_unique<Scene>();
-        m_Renderer = std::make_unique<WorldRenderer>(m_Device.get(), m_World.get(), m_SwapChain.get(), m_Window.get());
+        m_Renderer = std::make_unique<Renderer>(m_Device.get(), m_SwapChain.get(), m_Window.get());
     }
 
     inline Device* device() const { return m_Device.get(); }

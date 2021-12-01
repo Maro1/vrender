@@ -30,8 +30,7 @@ private:
 class Component
 {
 public:
-    virtual void start() {}
-    virtual void update() {}
+    virtual ~Component() = default;
 
     inline Entity* getEntity() { return m_Entity; };
     inline void setEntity(Entity* entity) { m_Entity = entity; }

@@ -1,6 +1,7 @@
 #include "vrender.hpp"
 
 #include "core/graphics_context.hpp"
+#include "core/rendering/render_system.hpp"
 #include "scene/model/mesh.hpp"
 #include "utils/log.hpp"
 
@@ -8,7 +9,8 @@ namespace vrender
 {
 VRender::VRender()
 {
-    GraphicsContext::get().window()->registerHandler(&GraphicsContext::get().renderer()->cameraController(),
+    // TODO: Make CameraController a system?
+    GraphicsContext::get().window()->registerHandler(GraphicsContext::get().world()->cameraController(),
                                                      {EventType::KeyPress, EventType::KeyRelease, EventType::MouseMove,
                                                       EventType::MouseButtonPress, EventType::MouseButtonRelease,
                                                       EventType::InputState});
@@ -32,12 +34,16 @@ int VRender::run()
         entity->getComponent<Transform>()->scale = glm::vec3(0.1f);
     }
 
+    MeshRenderSystem renderSystem(GraphicsContext::get().device(), GraphicsContext::get().swapChain(),
+                                  GraphicsContext::get().window(), GraphicsContext::get().world());
+
+    renderSystem.start();
+
     while (!GraphicsContext::get().window()->shouldClose())
     {
         glfwPollEvents();
         GraphicsContext::get().window()->update();
-        WorldRenderer* renderer = static_cast<WorldRenderer*>(GraphicsContext::get().renderer());
-        renderer->render();
+        renderSystem.update();
     }
     vkDeviceWaitIdle(GraphicsContext::get().device()->device());
     return 0;

@@ -17,7 +17,11 @@ class UniformHandler
 public:
     UniformHandler(VkDeviceSize size);
 
-    template <typename T> void update(const std::string& name, const T& object);
+    template <typename T> void update(const std::string& name, const T& object)
+    {
+        Uniform uniform = m_Uniforms.find(name)->second;
+        m_UniformBuffer.copyData(&object, uniform.size, uniform.offset);
+    }
 
     Buffer* buffer() { return &m_UniformBuffer; }
 

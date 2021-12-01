@@ -1,7 +1,7 @@
 #pragma once
 
 #include "app/window.hpp"
-#include "core/renderer.hpp"
+#include "core/rendering/renderer.hpp"
 #include "core/vulkan/device.hpp"
 #include "core/vulkan/pipeline.hpp"
 

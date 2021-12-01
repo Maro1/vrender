@@ -8,10 +8,4 @@ UniformHandler::UniformHandler(VkDeviceSize size)
 {
 }
 
-template <typename T> void UniformHandler::update(const std::string& name, const T& object)
-{
-    Uniform uniform = m_Uniforms.find(name);
-    m_UniformBuffer.copyData(&object, uniform.size, uniform.offset);
-}
-
 } // namespace vrender

@@ -1,12 +1,14 @@
 #include "descriptor_set.hpp"
 
+#include "core/vulkan/pipeline.hpp"
+
 namespace vrender
 {
 
 DescriptorPool::DescriptorPool(Device* device, DescriptorSetAllocator* allocator, unsigned int descriptorCount)
     : m_Device(device), m_Allocator(allocator)
 {
-    createDescriptorPool(descriptorCount);
+    createDescriptorPool(descriptorCount + 10);
     m_DescriptorSets = m_Allocator->allocate(m_Pool, descriptorCount);
 }
 
@@ -31,9 +33,9 @@ VkResult DescriptorPool::createDescriptorPool(unsigned int descriptorCount)
 }
 
 // ----------- VDescriptorSetAllocator
-DescriptorSetAllocator::DescriptorSetAllocator(Device* device) : m_Device(device)
+DescriptorSetAllocator::DescriptorSetAllocator(Device* device, Pipeline* pipeline)
+    : m_Device(device), m_Layout(pipeline->descriptorSetLayout())
 {
-    createMVPLayout();
 }
 
 DescriptorSetAllocator::~DescriptorSetAllocator()
@@ -53,24 +55,8 @@ std::vector<VkDescriptorSet> DescriptorSetAllocator::allocate(VkDescriptorPool p
     allocInfo.descriptorSetCount = count;
     allocInfo.pSetLayouts = layouts.data();
 
-    vkAllocateDescriptorSets(m_Device->device(), &allocInfo, descriptorSets.data());
+    VkResult result = vkAllocateDescriptorSets(m_Device->device(), &allocInfo, descriptorSets.data());
     return descriptorSets;
 }
 
-VkResult DescriptorSetAllocator::createMVPLayout()
-{
-    VkDescriptorSetLayoutBinding layoutBinding = {};
-    layoutBinding.binding = 0;
-    layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    layoutBinding.descriptorCount = 1;
-    layoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-    layoutBinding.pImmutableSamplers = nullptr;
-
-    VkDescriptorSetLayoutCreateInfo layoutInfo = {};
-    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutInfo.bindingCount = 1;
-    layoutInfo.pBindings = &layoutBinding;
-
-    return vkCreateDescriptorSetLayout(m_Device->device(), &layoutInfo, nullptr, &m_Layout);
-}
 }; // namespace vrender

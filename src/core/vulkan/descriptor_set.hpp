@@ -1,12 +1,14 @@
 #pragma once
 
 #include "core/vulkan/device.hpp"
+
 #include "utils/noncopyable.hpp"
 
 namespace vrender
 {
 
 class DescriptorSetAllocator;
+class Pipeline;
 
 class DescriptorPool : private NonCopyable
 {
@@ -32,7 +34,7 @@ private:
 class DescriptorSetAllocator
 {
 public:
-    DescriptorSetAllocator(Device* device);
+    DescriptorSetAllocator(Device* device, Pipeline* pipeline);
     ~DescriptorSetAllocator();
 
     VkDescriptorSetLayout layout() const { return m_Layout; }
@@ -40,8 +42,6 @@ public:
     std::vector<VkDescriptorSet> allocate(VkDescriptorPool pool, unsigned int count) const;
 
 private:
-    VkResult createMVPLayout();
-
     Device* m_Device;
 
     VkDescriptorSetLayout m_Layout;

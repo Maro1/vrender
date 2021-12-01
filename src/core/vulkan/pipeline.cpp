@@ -1,15 +1,16 @@
 #include "pipeline.hpp"
 
+#include "core/rendering/render_system.hpp"
 #include "core/vulkan/buffer.hpp"
+#include <vulkan/vulkan_core.h>
 
 namespace vrender
 {
 Pipeline::Pipeline(Device* device, SwapChain* swapChain)
-    : m_Device(device), m_SwapChain(swapChain), m_DescriptorSetAllocator(device),
-      m_DescriptorPool(device, &m_DescriptorSetAllocator, swapChain->images().size()),
+    : m_Device(device), m_SwapChain(swapChain),
       m_Shader(device, "shader_bin/triangle.vert.spv", "shader_bin/triangle.frag.spv")
 {
-    m_DescriptorSetLayout = m_DescriptorSetAllocator.layout();
+    createGraphicsDescriptorLayout();
     createGraphicsPipeline();
 }
 
@@ -119,12 +120,17 @@ bool Pipeline::createGraphicsPipeline()
     colorBlending.blendConstants[2] = 0.0f;
     colorBlending.blendConstants[3] = 0.0f;
 
+    VkPushConstantRange pushConstantRange = {};
+    pushConstantRange.offset = 0;
+    pushConstantRange.size = sizeof(PushData);
+    pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
     VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutInfo.pSetLayouts = &m_DescriptorSetLayout;
     pipelineLayoutInfo.setLayoutCount = 1;
-    pipelineLayoutInfo.pushConstantRangeCount = 0;
-    pipelineLayoutInfo.pPushConstantRanges = nullptr;
+    pipelineLayoutInfo.pushConstantRangeCount = 1;
+    pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
     VkResult layoutResult = vkCreatePipelineLayout(m_Device->device(), &pipelineLayoutInfo, nullptr, &m_Layout);
 
@@ -156,5 +162,31 @@ bool Pipeline::createGraphicsPipeline()
 
     return vkCreateGraphicsPipelines(m_Device->device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_Pipeline) ==
            VK_SUCCESS;
+}
+
+bool Pipeline::createGraphicsDescriptorLayout()
+{
+    VkDescriptorSetLayoutBinding globalBinding = {};
+    globalBinding.binding = 0;
+    globalBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    globalBinding.descriptorCount = 1;
+    globalBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    globalBinding.pImmutableSamplers = nullptr;
+
+    VkDescriptorSetLayoutBinding localBinding = {};
+    localBinding.binding = 1;
+    localBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    localBinding.descriptorCount = 1;
+    localBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    localBinding.pImmutableSamplers = nullptr;
+
+    VkDescriptorSetLayoutBinding bindings[] = {globalBinding, localBinding};
+
+    VkDescriptorSetLayoutCreateInfo layoutInfo = {};
+    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    layoutInfo.bindingCount = 2;
+    layoutInfo.pBindings = bindings;
+
+    return vkCreateDescriptorSetLayout(m_Device->device(), &layoutInfo, nullptr, &m_DescriptorSetLayout) == VK_SUCCESS;
 }
 }; // namespace vrender

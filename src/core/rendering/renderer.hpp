@@ -37,7 +37,8 @@ public:
     void endRenderPass();
 
     inline Pipeline& pipeline() { return m_Pipeline; }
-    inline CameraController& cameraController() { return m_CameraController; }
+    inline SwapChain* swapChain() { return m_SwapChain; }
+    inline uint32_t currentFrame() const { return m_CurrentFrame; }
 
 protected:
     void init();
@@ -49,29 +50,10 @@ protected:
     Window* m_Window;
 
     Pipeline m_Pipeline;
-    std::unique_ptr<Camera> m_Camera;
-    ArcballCameraController m_CameraController;
 
     std::vector<VkCommandBuffer> m_CommandBuffers;
     uint32_t m_CurrentFrame = 0;
     uint32_t m_CurrentImage;
-};
-
-class WorldRenderer : public Renderer
-{
-public:
-    WorldRenderer(Device* device, Scene* world, SwapChain* swapChain, Window* window)
-        : Renderer(device, swapChain, window), m_World(world)
-    {
-        m_World->setCamera(std::move(m_Camera));
-    }
-
-    void render();
-
-private:
-    void drawWorld(VkCommandBuffer commandBuffer);
-
-    Scene* m_World;
 };
 
 }; // namespace vrender

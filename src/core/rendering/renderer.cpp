@@ -11,12 +11,9 @@ namespace vrender
 {
 
 Renderer::Renderer(Device* device, SwapChain* swapChain, Window* window)
-    : m_Device(device), m_SwapChain(swapChain), m_Window(window), m_Pipeline(device, swapChain),
-      m_Camera(std::unique_ptr<Camera>(new Camera())), m_CameraController(m_Camera.get())
+    : m_Device(device), m_SwapChain(swapChain), m_Window(window), m_Pipeline(device, swapChain)
 {
     init();
-    m_Camera->setAspectRatio((float)m_SwapChain->extent().width / (float)m_SwapChain->extent().height);
-    m_Camera->setPosition(glm::vec3(0.0f, 0.0f, 4.0f));
 }
 
 Renderer::~Renderer() {}
@@ -80,7 +77,7 @@ void Renderer::beginRenderPass()
     renderPassInfo.renderArea = {0, 0};
     renderPassInfo.renderArea.extent = m_SwapChain->extent();
 
-    VkClearValue clearColor = {0.05f, 0.05f, 0.05f, 1.0f};
+    VkClearValue clearColor = {0.01f, 0.01f, 0.01f, 1.0f};
     renderPassInfo.clearValueCount = 1;
     renderPassInfo.pClearValues = &clearColor;
 
@@ -113,38 +110,6 @@ VkResult Renderer::createCommandBuffers()
     allocInfo.commandBufferCount = (uint32_t)m_CommandBuffers.size();
 
     return vkAllocateCommandBuffers(m_Device->device(), &allocInfo, m_CommandBuffers.data());
-}
-
-void WorldRenderer::render()
-{
-    // TODO: Replace with world.update() which should update all components and not be called from here
-    for (Entity* entity : m_World->entities())
-    {
-        if (entity->hasComponent<Mesh>())
-        {
-            Mesh* mesh = entity->getComponent<Mesh>();
-            mesh->update();
-        }
-    }
-
-    VkCommandBuffer commandBuffer = beginFrame();
-    beginRenderPass();
-    pipeline().bind(commandBuffer);
-    drawWorld(commandBuffer);
-    endRenderPass();
-    endFrame();
-}
-
-void WorldRenderer::drawWorld(VkCommandBuffer commandBuffer)
-{
-    for (Entity* entity : m_World->entities())
-    {
-        if (entity->hasComponent<Mesh>())
-        {
-            Mesh* mesh = entity->getComponent<Mesh>();
-            mesh->draw(commandBuffer, m_Pipeline, m_CurrentFrame);
-        }
-    }
 }
 
 }; // namespace vrender
