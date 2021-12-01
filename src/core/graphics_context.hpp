@@ -1,6 +1,5 @@
 #pragma once
 
-#include "app/vrender.hpp"
 #include "app/window.hpp"
 #include "core/memory/memory_allocator.hpp"
 #include "core/rendering/renderer.hpp"
@@ -12,6 +11,7 @@
 
 namespace vrender
 {
+
 class GraphicsContext : private NonCopyable
 {
 
@@ -22,15 +22,7 @@ public:
         return context;
     }
 
-    void init()
-    {
-        m_Window = std::make_unique<Window>(VRender::appInfo().title);
-        m_Device = std::make_unique<Device>(VRender::appInfo(), m_Window.get());
-        m_MemoryAllocator = std::make_unique<DeviceMemoryAllocator>(device(), device()->memorySize());
-        m_SwapChain = std::make_unique<SwapChain>(m_Device.get(), m_Window.get());
-        m_World = std::make_unique<Scene>();
-        m_Renderer = std::make_unique<Renderer>(m_Device.get(), m_SwapChain.get(), m_Window.get());
-    }
+    void init(const AppInfo& appInfo);
 
     inline Device* device() const { return m_Device.get(); }
     inline Renderer* renderer() const { return m_Renderer.get(); }

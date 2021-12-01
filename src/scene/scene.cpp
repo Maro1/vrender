@@ -13,6 +13,14 @@ Scene::~Scene()
     }
 }
 
+void Scene::update()
+{
+    for (auto& system : m_Systems)
+    {
+        system->update();
+    }
+}
+
 Entity* Scene::createEntity()
 {
     Entity* entity = new Entity(this);

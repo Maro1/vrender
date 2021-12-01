@@ -1,9 +1,6 @@
 #pragma once
 
-#include "app/window.hpp"
-#include "core/rendering/renderer.hpp"
-#include "core/vulkan/device.hpp"
-#include "core/vulkan/pipeline.hpp"
+#include "app/app.hpp"
 
 #include "events/key_events.hpp"
 #include "utils/log.hpp"
@@ -12,21 +9,13 @@
 namespace vrender
 {
 
-struct AppInfo
-{
-    std::string title;
-    uint32_t apiMajor;
-    uint32_t apiMinor;
-};
-
-class VRender : private NonCopyable
+class VRender : public App
 {
 public:
     VRender();
     ~VRender();
 
-    int run();
-    static const AppInfo& appInfo() { return sAppInfo; }
+    virtual int run() override;
 
 private:
     inline static const AppInfo sAppInfo = {"VRender", 1, 2};

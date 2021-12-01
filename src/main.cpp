@@ -4,7 +4,6 @@
 
 int main()
 {
-    vrender::GraphicsContext::get().init();
     vrender::VRender vrender;
     if (!vrender.run())
     {

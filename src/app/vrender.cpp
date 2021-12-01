@@ -1,5 +1,6 @@
 #include "vrender.hpp"
 
+#include "app/app.hpp"
 #include "core/graphics_context.hpp"
 #include "core/rendering/render_system.hpp"
 #include "scene/model/mesh.hpp"
@@ -7,7 +8,7 @@
 
 namespace vrender
 {
-VRender::VRender()
+VRender::VRender() : App(sAppInfo)
 {
     // TODO: Make CameraController a system?
     GraphicsContext::get().window()->registerHandler(GraphicsContext::get().world()->cameraController(),
@@ -25,27 +26,24 @@ int VRender::run()
 
     for (uint32_t i = 0; i < 10; i++)
     {
-        Entity* entity = GraphicsContext::get().world()->createEntity();
+        Entity* entity = world()->createEntity();
 
-        entity->addComponent<Mesh>(GraphicsContext::get().device(), "../assets/models/cube.obj");
+        entity->addComponent<Mesh>(device(), "../assets/models/cube.obj");
         entity->addComponent<Transform>();
 
         entity->getComponent<Transform>()->position = glm::vec3(i * 1.0f, 0.0f, 0.0f);
         entity->getComponent<Transform>()->scale = glm::vec3(0.1f);
     }
 
-    MeshRenderSystem renderSystem(GraphicsContext::get().device(), GraphicsContext::get().swapChain(),
-                                  GraphicsContext::get().window(), GraphicsContext::get().world());
-
-    renderSystem.start();
+    world()->addSystem<MeshRenderSystem>(device(), swapChain(), window(), world());
 
     while (!GraphicsContext::get().window()->shouldClose())
     {
         glfwPollEvents();
-        GraphicsContext::get().window()->update();
-        renderSystem.update();
+        window()->update();
+        world()->update();
     }
-    vkDeviceWaitIdle(GraphicsContext::get().device()->device());
+    vkDeviceWaitIdle(device()->device());
     return 0;
 }
 }; // namespace vrender

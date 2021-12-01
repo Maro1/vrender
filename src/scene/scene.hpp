@@ -3,10 +3,12 @@
 #include <memory>
 #include <set>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include "ecs/component.hpp"
 #include "ecs/entity.hpp"
+#include "ecs/system.hpp"
 
 #include "scene/camera/arcball_camera.hpp"
 
@@ -25,8 +27,17 @@ public:
     }
     ~Scene();
 
+    void update();
+
     Entity* createEntity();
     void removeEntity(Entity* entity);
+
+    template <typename T, typename... Args> System* addSystem(Args&&... args)
+    {
+        m_Systems.push_back(std::make_unique<T>(std::forward<Args>(args)...));
+        m_Systems.back()->start();
+        return m_Systems.back().get();
+    }
 
     inline const std::unordered_set<Entity*>& entities() const { return m_Entities; }
 
@@ -36,6 +47,7 @@ public:
 
 private:
     std::unordered_set<Entity*> m_Entities;
+    std::vector<std::unique_ptr<System>> m_Systems;
 
     std::unique_ptr<Camera> m_Camera;
     std::unique_ptr<CameraController> m_CameraController;

@@ -1,7 +1,11 @@
 #pragma once
 
-#include "scene/scene.hpp"
 #include "utils/noncopyable.hpp"
+
+#include "ecs/entity.hpp"
+#include <unordered_set>
+
+class Scene;
 
 namespace vrender
 {
@@ -14,7 +18,7 @@ public:
     virtual void update() {}
 
 protected:
-    inline const std::unordered_set<Entity*>& entities() const { return m_Scene->entities(); }
+    const std::unordered_set<Entity*>& entities() const;
 
     Scene* m_Scene;
 };
