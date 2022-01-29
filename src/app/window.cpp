@@ -1,5 +1,6 @@
 #include "window.hpp"
 
+#include "core/graphics_context.hpp"
 #include "events/key_events.hpp"
 #include "events/mouse_events.hpp"
 
@@ -73,6 +74,8 @@ void Window::framebufferSizeCallback(GLFWwindow* window, int width, int height)
     pWindow->m_FramebufferResized = true;
     pWindow->m_Width = width;
     pWindow->m_Height = height;
+
+    GraphicsContext::get().world()->camera()->setAspectRatio((float)width / height);
 
     WindowResizeEvent e(width, height);
     pWindow->handleEvent(EventType::WindowResize, e);

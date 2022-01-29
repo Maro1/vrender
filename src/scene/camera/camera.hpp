@@ -34,7 +34,7 @@ private:
     glm::quat m_Rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 
     float m_Fovy = 45.0f;
-    float m_ZNear = 1.0f;
+    float m_ZNear = 0.0f;
     float m_ZFar = 1000.0f;
 
     float m_AspectRatio = 0.0f;
