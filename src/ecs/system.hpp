@@ -13,6 +13,7 @@ class System : private NonCopyable
 {
 public:
     System(Scene* scene) : m_Scene(scene) {}
+    virtual ~System() = default;
 
     virtual void start() {}
     virtual void update() {}

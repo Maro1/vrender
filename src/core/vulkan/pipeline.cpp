@@ -18,6 +18,7 @@ Pipeline::~Pipeline()
 {
     vkDestroyPipeline(m_Device->device(), m_Pipeline, nullptr);
     vkDestroyPipelineLayout(m_Device->device(), m_Layout, nullptr);
+    vkDestroyDescriptorSetLayout(m_Device->device(), m_DescriptorSetLayout, nullptr);
 }
 
 void Pipeline::bind(const VkCommandBuffer& commandBuffer)

@@ -115,6 +115,9 @@ DeviceMemoryAllocator::~DeviceMemoryAllocator()
 {
     for (const MemoryAllocation* alloc : m_Allocations)
     {
+        if (!alloc)
+            continue;
+
         const MemoryAllocation* next = alloc;
         do
         {
