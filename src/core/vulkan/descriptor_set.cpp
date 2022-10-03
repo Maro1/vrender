@@ -48,7 +48,6 @@ DescriptorSetAllocator::DescriptorSetAllocator(Device* device, Pipeline* pipelin
 
 DescriptorSetAllocator::~DescriptorSetAllocator()
 {
-    vkDestroyDescriptorSetLayout(m_Device->device(), m_Layout, nullptr);
 }
 
 std::vector<VkDescriptorSet> DescriptorSetAllocator::allocate(VkDescriptorPool pool, unsigned int count) const

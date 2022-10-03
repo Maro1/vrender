@@ -30,7 +30,7 @@ class RenderSystem : private NonCopyable
 {
 public:
     RenderSystem();
-    ~RenderSystem();
+    virtual ~RenderSystem() = default;
 };
 
 class MeshRenderSystem : public System
