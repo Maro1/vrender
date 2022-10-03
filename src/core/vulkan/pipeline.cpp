@@ -139,6 +139,16 @@ bool Pipeline::createGraphicsPipeline()
     dynamicStateInfo.dynamicStateCount = m_DynamicStatesEnabled.size();
     dynamicStateInfo.pDynamicStates = m_DynamicStatesEnabled.data();
 
+    VkPipelineDepthStencilStateCreateInfo depthStencilInfo = {};
+    depthStencilInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+    depthStencilInfo.depthTestEnable = VK_TRUE;
+    depthStencilInfo.depthWriteEnable = VK_TRUE;
+    depthStencilInfo.depthCompareOp = VK_COMPARE_OP_LESS;
+    depthStencilInfo.depthBoundsTestEnable = VK_FALSE;
+    depthStencilInfo.minDepthBounds = 0.0f;
+    depthStencilInfo.maxDepthBounds = 1.0f;
+    depthStencilInfo.stencilTestEnable = VK_TRUE;
+
     VkGraphicsPipelineCreateInfo pipelineInfo = {};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
     pipelineInfo.stageCount = 2;
@@ -151,6 +161,7 @@ bool Pipeline::createGraphicsPipeline()
     pipelineInfo.pDepthStencilState = nullptr;
     pipelineInfo.pColorBlendState = &colorBlending;
     pipelineInfo.pDynamicState = &dynamicStateInfo;
+    pipelineInfo.pDepthStencilState = &depthStencilInfo;
 
     pipelineInfo.layout = m_Layout;
 
@@ -180,11 +191,17 @@ bool Pipeline::createGraphicsDescriptorLayout()
     localBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     localBinding.pImmutableSamplers = nullptr;
 
-    VkDescriptorSetLayoutBinding bindings[] = {globalBinding, localBinding};
+    VkDescriptorSetLayoutBinding samplerBinding = {};
+    samplerBinding.binding = 2;
+    samplerBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    samplerBinding.descriptorCount = 1;
+    samplerBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    VkDescriptorSetLayoutBinding bindings[] = {globalBinding, localBinding, samplerBinding};
 
     VkDescriptorSetLayoutCreateInfo layoutInfo = {};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutInfo.bindingCount = 2;
+    layoutInfo.bindingCount = 3;
     layoutInfo.pBindings = bindings;
 
     return vkCreateDescriptorSetLayout(m_Device->device(), &layoutInfo, nullptr, &m_DescriptorSetLayout) == VK_SUCCESS;

@@ -1,14 +1,16 @@
 #include "descriptor_set.hpp"
 
 #include "core/vulkan/pipeline.hpp"
+#include <vulkan/vulkan_core.h>
 
 namespace vrender
 {
 
-DescriptorPool::DescriptorPool(Device* device, DescriptorSetAllocator* allocator, unsigned int descriptorCount)
+DescriptorPool::DescriptorPool(Device* device, DescriptorSetAllocator* allocator,
+                               std::vector<VkDescriptorType> descriptorTypes, unsigned int descriptorCount)
     : m_Device(device), m_Allocator(allocator)
 {
-    createDescriptorPool(descriptorCount + 10);
+    createDescriptorPool(descriptorTypes, descriptorCount + 10);
     m_DescriptorSets = m_Allocator->allocate(m_Pool, descriptorCount);
 }
 
@@ -17,16 +19,22 @@ DescriptorPool::~DescriptorPool()
     vkDestroyDescriptorPool(m_Device->device(), m_Pool, nullptr);
 }
 
-VkResult DescriptorPool::createDescriptorPool(unsigned int descriptorCount)
+VkResult DescriptorPool::createDescriptorPool(std::vector<VkDescriptorType> types, unsigned int descriptorCount)
 {
-    VkDescriptorPoolSize poolSize = {};
-    poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    poolSize.descriptorCount = static_cast<uint32_t>(descriptorCount);
+    std::vector<VkDescriptorPoolSize> poolSizes;
+
+    for (const VkDescriptorType& type : types)
+    {
+        VkDescriptorPoolSize poolSize = {};
+        poolSize.type = type;
+        poolSize.descriptorCount = static_cast<uint32_t>(descriptorCount);
+        poolSizes.push_back(poolSize);
+    }
 
     VkDescriptorPoolCreateInfo poolInfo = {};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.poolSizeCount = 1;
-    poolInfo.pPoolSizes = &poolSize;
+    poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+    poolInfo.pPoolSizes = poolSizes.data();
     poolInfo.maxSets = static_cast<uint32_t>(descriptorCount);
 
     return vkCreateDescriptorPool(m_Device->device(), &poolInfo, nullptr, &m_Pool);

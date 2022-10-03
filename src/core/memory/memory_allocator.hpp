@@ -72,6 +72,9 @@ public:
     bool allocate(VkDeviceSize size, uint32_t memoryTypeIndex, MemoryBlock& block);
     void free(const MemoryBlock& block);
 
+    static bool findMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags flags,
+                               uint32_t& typeIndex);
+
 private:
     MemoryAllocation* allocateNewMemory(VkDeviceSize size, uint32_t memoryTypeIndex);
     MemoryAllocation* findSuitableAllocation(VkDeviceSize size, uint32_t memoryTypeIndex);

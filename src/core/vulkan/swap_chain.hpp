@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/vulkan/device.hpp"
+#include "core/vulkan/image.hpp"
 #include <memory>
 
 namespace vrender
@@ -8,7 +9,7 @@ namespace vrender
 class SwapChain
 {
 public:
-    SwapChain(Device* device, Window* window) : m_Window(window), m_Device(device) { init(); };
+    SwapChain(Device* device, Window* window);
     ~SwapChain();
 
     void recreate();
@@ -58,5 +59,8 @@ private:
     std::vector<VkFence> m_ImagesInFlight;
 
     unsigned int m_CurrentFrame = 0;
+
+    Image m_DepthImage;
+    ImageView m_DepthImageView;
 };
 }; // namespace vrender

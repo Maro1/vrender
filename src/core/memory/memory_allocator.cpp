@@ -201,4 +201,21 @@ void DeviceMemoryAllocator::free(const MemoryBlock& block)
     m_Allocations[block.typeIndex]->freeBlock(block);
 }
 
+bool DeviceMemoryAllocator::findMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter,
+                                           VkMemoryPropertyFlags flags, uint32_t& typeIndex)
+{
+    VkPhysicalDeviceMemoryProperties memoryProperties;
+    vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memoryProperties);
+
+    for (uint32_t i = 0; i < memoryProperties.memoryTypeCount; i++)
+    {
+        if (typeFilter & (1 << i) && (memoryProperties.memoryTypes[i].propertyFlags & flags) == flags)
+        {
+            typeIndex = i;
+            return true;
+        }
+    }
+    return false;
+}
+
 }; // namespace vrender

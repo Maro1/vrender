@@ -24,6 +24,7 @@ link_directories("$ENV{VULKAN_SDK}/lib")
 link_directories("$ENV{VULKAN_SDK}/etc/explicit_layer.d")
 
 include_directories("${PROJECT_SOURCE_DIR}/src")
+include_directories("${PROJECT_SOURCE_DIR}/third_party")
 
 find_package(Vulkan REQUIRED)
 

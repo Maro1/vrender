@@ -146,7 +146,8 @@ int Device::createLogicalDevice()
         queueCreateInfos.push_back(queueCreateInfo);
     }
 
-    VkPhysicalDeviceFeatures deviceFeatures{};
+    VkPhysicalDeviceFeatures deviceFeatures = {};
+    deviceFeatures.samplerAnisotropy = VK_TRUE;
 
     VkDeviceCreateInfo createInfo;
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -295,7 +296,12 @@ int Device::checkPhysicalDevice(const VkPhysicalDevice& device)
     vkGetPhysicalDeviceProperties(device, &deviceProperties);
 
     VkPhysicalDeviceFeatures deviceFeatures;
-    vkGetPhysicalDeviceFeatures(device, &deviceFeatures); // TODO: Check these if needed
+    vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+    if (!deviceFeatures.samplerAnisotropy)
+    {
+        return 0;
+    }
 
     int score = 0;
 

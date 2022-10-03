@@ -1,5 +1,7 @@
 #include "buffer.hpp"
 #include "core/graphics_context.hpp"
+#include "core/memory/memory_allocator.hpp"
+#include "core/vulkan/command_buffer.hpp"
 #include "utils/log.hpp"
 #include <vulkan/vulkan_core.h>
 
@@ -17,7 +19,6 @@ Buffer::~Buffer()
 {
     vkDestroyBuffer(m_Device->device(), m_Buffer, nullptr);
 
-    auto x = GraphicsContext::get().deviceMemoryAllocator();
     GraphicsContext::get().deviceMemoryAllocator()->free(m_Memory);
 }
 
@@ -31,7 +32,8 @@ bool Buffer::createBuffer(const BufferInfo& bufferInfo, VkBuffer& buffer, Memory
     createInfo.size = bufferInfo.size;
     createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    if (vkCreateBuffer(m_Device->device(), &createInfo, nullptr, &buffer) != VK_SUCCESS)
+    VkResult result = vkCreateBuffer(m_Device->device(), &createInfo, nullptr, &buffer);
+    if (result != VK_SUCCESS)
     {
         V_LOG_ERROR("Unable to create vertex buffer.");
         return false;
@@ -42,9 +44,10 @@ bool Buffer::createBuffer(const BufferInfo& bufferInfo, VkBuffer& buffer, Memory
 
     VkMemoryAllocateInfo allocInfo = {};
     uint32_t typeIndex;
-    if (!findMemoryType(memoryRequirements.memoryTypeBits, bufferInfo.memoryProperties, typeIndex))
+    if (!DeviceMemoryAllocator::findMemoryType(m_Device->physicalDevice(), memoryRequirements.memoryTypeBits,
+                                               bufferInfo.memoryProperties, typeIndex))
     {
-        V_LOG_ERROR("Failed to find required memory for vertex buffer.");
+        V_LOG_ERROR("Failed to find required memory for buffer.");
         return false;
     }
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -58,22 +61,6 @@ bool Buffer::createBuffer(const BufferInfo& bufferInfo, VkBuffer& buffer, Memory
     return true;
 }
 
-bool Buffer::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags flags, uint32_t& typeIndex)
-{
-    VkPhysicalDeviceMemoryProperties memoryProperties;
-    vkGetPhysicalDeviceMemoryProperties(m_Device->physicalDevice(), &memoryProperties);
-
-    for (uint32_t i = 0; i < memoryProperties.memoryTypeCount; i++)
-    {
-        if (typeFilter & (1 << i) && (memoryProperties.memoryTypes[i].propertyFlags & flags) == flags)
-        {
-            typeIndex = i;
-            return true;
-        }
-    }
-    return false;
-}
-
 void* Buffer::copyData(void* src, size_t size, size_t offset)
 {
     void* data;
@@ -83,7 +70,7 @@ void* Buffer::copyData(void* src, size_t size, size_t offset)
     return data;
 }
 
-// ----------- VVertexBuffer --------------
+// ----------- VertexBuffer --------------
 VertexBuffer::VertexBuffer(Device* device, std::vector<Vertex> vertices, std::vector<uint16_t> indices)
     : Buffer(device), m_Vertices(vertices), m_Indices(indices)
 {
@@ -149,39 +136,17 @@ void VertexBuffer::createIndexBuffer()
 
 void VertexBuffer::copyBuffer(const VkBuffer& dstBuffer, VkDeviceSize size)
 {
-    VkCommandBufferAllocateInfo allocInfo = {};
-    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandBufferCount = 1;
-    allocInfo.commandPool = m_Device->commandPool();
-
-    VkCommandBuffer commandBuffer;
-    vkAllocateCommandBuffers(m_Device->device(), &allocInfo, &commandBuffer);
-
-    VkCommandBufferBeginInfo beginInfo = {};
-    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-    vkBeginCommandBuffer(commandBuffer, &beginInfo);
+    CommandBuffer cmdBuffer(m_Device);
+    cmdBuffer.begin(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
     VkBufferCopy copyRegion = {};
     copyRegion.srcOffset = 0;
     copyRegion.dstOffset = 0;
     copyRegion.size = size;
 
-    vkCmdCopyBuffer(commandBuffer, m_StagingBuffer, dstBuffer, 1, &copyRegion);
+    vkCmdCopyBuffer(cmdBuffer.buffer(), m_StagingBuffer, dstBuffer, 1, &copyRegion);
 
-    vkEndCommandBuffer(commandBuffer);
-
-    VkSubmitInfo submitInfo = {};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &commandBuffer;
-
-    vkQueueSubmit(m_Device->graphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
-    vkQueueWaitIdle(m_Device->graphicsQueue());
-
-    vkFreeCommandBuffers(m_Device->device(), m_Device->commandPool(), 1, &commandBuffer);
+    cmdBuffer.submit_wait();
 }
 
 void VertexBuffer::bind(const VkCommandBuffer& commandBuffer) const
