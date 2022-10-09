@@ -41,7 +41,7 @@ protected:
 class ImageView : private NonCopyable
 {
 public:
-    ImageView(Device* device, const Image& image, VkImageAspectFlags aspectFlags);
+    ImageView(Device* device, const Image& image, VkImageAspectFlags aspectFlags, VkFormat format);
 
     ~ImageView();
 

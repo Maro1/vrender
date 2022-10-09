@@ -1,6 +1,7 @@
 #include "renderer.hpp"
 
 #include "scene/model/mesh.hpp"
+#include "utils/log.hpp"
 
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
@@ -56,13 +57,10 @@ VkResult Renderer::endFrame()
         return commandResult;
 
     VkResult queuePresentResult = m_SwapChain->submitCommandBuffers(&m_CommandBuffers[m_CurrentFrame], m_CurrentImage);
-
-    if (queuePresentResult == VK_ERROR_OUT_OF_DATE_KHR || queuePresentResult == VK_SUBOPTIMAL_KHR ||
-        m_Window->framebufferResized())
-    {
-        m_Window->setFrameBufferResized(false);
-        m_SwapChain->recreate();
+    if (queuePresentResult == VK_ERROR_DEVICE_LOST) {
+        V_LOG_ERROR("Error during queue submit");
     }
+
     m_CurrentFrame = (m_CurrentFrame + 1) % SwapChain::MAX_FRAMES_IN_FLIGHT;
     return queuePresentResult;
 }

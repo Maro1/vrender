@@ -56,11 +56,10 @@ private:
     std::vector<VkSemaphore> m_ImageAvailableSemaphores;
     std::vector<VkSemaphore> m_RenderFinishedSemaphores;
     std::vector<VkFence> m_InFlightFences;
-    std::vector<VkFence> m_ImagesInFlight;
 
     unsigned int m_CurrentFrame = 0;
 
-    Image m_DepthImage;
-    ImageView m_DepthImageView;
+    std::unique_ptr<Image> m_DepthImage;
+    std::unique_ptr<ImageView> m_DepthImageView;
 };
 }; // namespace vrender

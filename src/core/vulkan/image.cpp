@@ -132,13 +132,13 @@ bool Image::createImage(const ImageInfo& imageInfo, VkImage& image, MemoryBlock&
 }
 
 // ImageView
-ImageView::ImageView(Device* device, const Image& image, VkImageAspectFlags aspectFlags) : m_Device(device)
+ImageView::ImageView(Device* device, const Image& image, VkImageAspectFlags aspectFlags, VkFormat format) : m_Device(device)
 {
     VkImageViewCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     createInfo.image = image.image();
     createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    createInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+    createInfo.format = format;
     createInfo.subresourceRange.aspectMask = aspectFlags;
     createInfo.subresourceRange.baseMipLevel = 0;
     createInfo.subresourceRange.levelCount = 1;

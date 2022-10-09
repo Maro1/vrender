@@ -3,19 +3,20 @@
 #include "app/window.hpp"
 #include "core/vulkan/device.hpp"
 #include "core/vulkan/pipeline.hpp"
+#include "utils/log.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cstdint>
-#include <vulkan/vulkan_core.h>
 
 namespace vrender
 {
 
 SwapChain::SwapChain(Device* device, Window* window)
     : m_Window(window), m_Device(device),
-      m_DepthImage(device, {VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL,
-                            window->extent().width, window->extent().height}),
-      m_DepthImageView(device, m_DepthImage, VK_IMAGE_ASPECT_DEPTH_BIT)
+      m_DepthImage(std::make_unique<Image>(device, ImageInfo{VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL,
+                            window->extent().width, window->extent().height})),
+      m_DepthImageView(std::make_unique<ImageView>(device, *m_DepthImage, VK_IMAGE_ASPECT_DEPTH_BIT, VK_FORMAT_D32_SFLOAT))
 {
     init();
 };
@@ -42,15 +43,18 @@ void SwapChain::recreate()
         extent = m_Window->extent();
         glfwWaitEvents();
     }
-    vkDeviceWaitIdle(m_Device->device());
+    VkResult result = vkDeviceWaitIdle(m_Device->device());
 
     cleanup();
 
+    // TODO: Make depth images part of m_SwapChainImages?
+    m_DepthImage = std::make_unique<Image>(m_Device, ImageInfo{VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL,
+                            m_Window->extent().width, m_Window->extent().height});
+    m_DepthImageView = std::make_unique<ImageView>(m_Device, *m_DepthImage, VK_IMAGE_ASPECT_DEPTH_BIT, VK_FORMAT_D32_SFLOAT);
     createSwapChain();
     createImageViews();
     createRenderPass();
     createFramebuffers();
-    m_ImagesInFlight.clear();
     createSyncObjects();
 }
 
@@ -64,6 +68,7 @@ void SwapChain::cleanup()
     {
         vkDestroyImageView(m_Device->device(), imageView, nullptr);
     }
+
     vkDestroySwapchainKHR(m_Device->device(), m_SwapChain, nullptr);
 
     vkDestroyRenderPass(m_Device->device(), m_RenderPass, nullptr);
@@ -78,7 +83,7 @@ void SwapChain::cleanup()
 
 VkResult SwapChain::aquireNextImage(uint32_t& imageIndex)
 {
-    vkWaitForFences(m_Device->device(), 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
+    VkResult result = vkWaitForFences(m_Device->device(), 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
 
     return vkAcquireNextImageKHR(m_Device->device(), m_SwapChain, UINT64_MAX,
                                  m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &imageIndex);
@@ -89,7 +94,6 @@ bool SwapChain::createSyncObjects()
     m_ImageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
     m_RenderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
     m_InFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
-    m_ImagesInFlight.resize(m_SwapChainImages.size(), VK_NULL_HANDLE);
 
     VkSemaphoreCreateInfo semaphoreInfo = {};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -114,11 +118,6 @@ bool SwapChain::createSyncObjects()
 
 VkResult SwapChain::submitCommandBuffers(const VkCommandBuffer* buffer, uint32_t imageIndex)
 {
-    if (m_ImagesInFlight[imageIndex] != VK_NULL_HANDLE)
-        vkWaitForFences(m_Device->device(), 1, &m_ImagesInFlight[m_CurrentFrame], VK_TRUE, UINT64_MAX);
-
-    m_ImagesInFlight[imageIndex] = m_InFlightFences[m_CurrentFrame];
-
     VkSubmitInfo submitInfo = {};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
@@ -138,7 +137,7 @@ VkResult SwapChain::submitCommandBuffers(const VkCommandBuffer* buffer, uint32_t
 
     VkResult queueSubmitResult =
         vkQueueSubmit(m_Device->graphicsQueue(), 1, &submitInfo, m_InFlightFences[m_CurrentFrame]);
-
+        
     if (queueSubmitResult != VK_SUCCESS)
         return queueSubmitResult;
 
@@ -154,6 +153,13 @@ VkResult SwapChain::submitCommandBuffers(const VkCommandBuffer* buffer, uint32_t
     presentInfo.pResults = nullptr;
 
     VkResult queuePresentResult = vkQueuePresentKHR(m_Device->graphicsQueue(), &presentInfo);
+
+    if (queuePresentResult == VK_ERROR_OUT_OF_DATE_KHR || queuePresentResult == VK_SUBOPTIMAL_KHR ||
+        m_Window->framebufferResized())
+    {
+        m_Window->setFrameBufferResized(false);
+        recreate();
+    }
 
     m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     return queuePresentResult;
@@ -351,7 +357,7 @@ void SwapChain::createFramebuffers()
     m_Framebuffers.resize(m_SwapChainImageViews.size());
     for (size_t i = 0; i < m_SwapChainImageViews.size(); i++)
     {
-        std::vector<VkImageView> attachments = {m_SwapChainImageViews[i], m_DepthImageView.imageView()};
+        std::vector<VkImageView> attachments = {m_SwapChainImageViews[i], m_DepthImageView->imageView()};
 
         VkFramebuffer framebuffer;
         VkFramebufferCreateInfo frambufferInfo = {};
