@@ -1,7 +1,9 @@
 #include "renderer.hpp"
 
 #include "scene/model/mesh.hpp"
+#include "utils/log.hpp"
 
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -55,13 +57,10 @@ VkResult Renderer::endFrame()
         return commandResult;
 
     VkResult queuePresentResult = m_SwapChain->submitCommandBuffers(&m_CommandBuffers[m_CurrentFrame], m_CurrentImage);
-
-    if (queuePresentResult == VK_ERROR_OUT_OF_DATE_KHR || queuePresentResult == VK_SUBOPTIMAL_KHR ||
-        m_Window->framebufferResized())
-    {
-        m_Window->setFrameBufferResized(false);
-        m_SwapChain->recreate();
+    if (queuePresentResult == VK_ERROR_DEVICE_LOST) {
+        V_LOG_ERROR("Error during queue submit");
     }
+
     m_CurrentFrame = (m_CurrentFrame + 1) % SwapChain::MAX_FRAMES_IN_FLIGHT;
     return queuePresentResult;
 }
@@ -77,9 +76,12 @@ void Renderer::beginRenderPass()
     renderPassInfo.renderArea = {0, 0};
     renderPassInfo.renderArea.extent = m_SwapChain->extent();
 
-    VkClearValue clearColor = {0.01f, 0.01f, 0.01f, 1.0f};
-    renderPassInfo.clearValueCount = 1;
-    renderPassInfo.pClearValues = &clearColor;
+    std::array<VkClearValue, 2> clearValues = {};
+    clearValues[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+    clearValues[1].depthStencil = {1.0f, 0};
+
+    renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+    renderPassInfo.pClearValues = clearValues.data();
 
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 

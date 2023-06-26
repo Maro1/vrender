@@ -13,7 +13,8 @@ class Pipeline;
 class DescriptorPool : private NonCopyable
 {
 public:
-    DescriptorPool(Device* device, DescriptorSetAllocator* allocator, unsigned int descriptorCount);
+    DescriptorPool(Device* device, DescriptorSetAllocator* allocator, std::vector<VkDescriptorType> descriptorTypes,
+                   unsigned int descriptorCount);
     ~DescriptorPool();
 
     inline const std::vector<VkDescriptorSet>& descriptorSets() const { return m_DescriptorSets; }
@@ -21,7 +22,7 @@ public:
     inline DescriptorSetAllocator* allocator() const { return m_Allocator; }
 
 private:
-    VkResult createDescriptorPool(unsigned int descriptorCount);
+    VkResult createDescriptorPool(std::vector<VkDescriptorType> types, unsigned int descriptorCount);
 
     VkDescriptorPool m_Pool;
 

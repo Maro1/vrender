@@ -24,6 +24,7 @@ link_directories("$ENV{VULKAN_SDK}/lib")
 link_directories("$ENV{VULKAN_SDK}/etc/explicit_layer.d")
 
 include_directories("${PROJECT_SOURCE_DIR}/src")
+include_directories("${PROJECT_SOURCE_DIR}/third_party")
 
 find_package(Vulkan REQUIRED)
 
@@ -59,6 +60,7 @@ option(GLFW_BUILD_TESTS OFF)
 option(GLFW_INSTALL OFF)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/glfw)
+
 target_link_libraries(${BINARY_NAME} glm)
 target_link_libraries(${BINARY_NAME} spdlog)
 target_link_libraries(${BINARY_NAME} glfw)

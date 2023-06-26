@@ -2,6 +2,7 @@
 
 #include "core/vulkan/buffer.hpp"
 #include "core/vulkan/device.hpp"
+#include "core/vulkan/image.hpp"
 #include "core/vulkan/pipeline.hpp"
 #include "core/vulkan/swap_chain.hpp"
 
@@ -12,6 +13,7 @@
 #include "utils/noncopyable.hpp"
 
 #include <vector>
+#include <vulkan/vulkan_core.h>
 
 namespace vrender
 {

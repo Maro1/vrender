@@ -12,6 +12,7 @@ namespace vrender
 struct Vertex
 {
     glm::vec3 position;
+    glm::vec2 texCoord;
 
     static VkVertexInputBindingDescription getBindingDescription()
     {
@@ -23,14 +24,19 @@ struct Vertex
     }
 
     // TODO: Only 1 element for now, expand when adding texcoord, normal etc
-    static std::array<VkVertexInputAttributeDescription, 1> getAttributeDescription()
+    static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescription()
     {
-        std::array<VkVertexInputAttributeDescription, 1> attributeDescriptions = {};
+        std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions = {};
 
         attributeDescriptions[0].location = 0;
         attributeDescriptions[0].binding = 0;
         attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
         attributeDescriptions[0].offset = offsetof(Vertex, position);
+
+        attributeDescriptions[1].location = 1;
+        attributeDescriptions[1].binding = 0;
+        attributeDescriptions[1].format = VK_FORMAT_R32G32_SFLOAT;
+        attributeDescriptions[1].offset = offsetof(Vertex, texCoord);
 
         return attributeDescriptions;
     }
@@ -63,9 +69,6 @@ protected:
     VkBuffer m_Buffer;
     MemoryBlock m_Memory;
     VkDeviceSize m_Size;
-
-private:
-    bool findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags flags, uint32_t& typeIndex);
 };
 
 class VertexBuffer : public Buffer

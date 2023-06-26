@@ -41,7 +41,11 @@ std::pair<std::vector<Vertex>, std::vector<uint16_t>> Mesh::loadFromFile(const s
 
         for (uint32_t j = 0; j < mesh->mNumVertices; j++)
         {
-            vertices.push_back({glm::vec3(mesh->mVertices[j].x, mesh->mVertices[j].y, mesh->mVertices[j].z)});
+            Vertex vertex;
+            vertex.position = glm::vec3(mesh->mVertices[j].x, mesh->mVertices[j].y, mesh->mVertices[j].z);
+            vertex.texCoord = glm::vec2(mesh->mTextureCoords[0][j].x, mesh->mTextureCoords[0][j].y);
+
+            vertices.push_back(vertex);
         }
 
         for (uint32_t j = 0; j < mesh->mNumFaces; j++)

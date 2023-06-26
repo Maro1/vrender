@@ -112,6 +112,15 @@ int Device::createVulkanInstance(const AppInfo& appInfo)
 
     populateDebugMessengerInfo(debugCreateInfo);
     createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
+
+    VkValidationFeatureEnableEXT enabled[] = {VK_VALIDATION_FEATURE_ENABLE_DEBUG_PRINTF_EXT};
+    VkValidationFeaturesEXT features{VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT};
+    features.disabledValidationFeatureCount = 0;
+    features.enabledValidationFeatureCount = 1;
+    features.pDisabledValidationFeatures = nullptr;
+    features.pEnabledValidationFeatures = enabled;
+    features.pNext = createInfo.pNext;
+    createInfo.pNext = &features;
 #else
     createInfo.enabledLayerCount = 0;
 #endif
@@ -146,7 +155,8 @@ int Device::createLogicalDevice()
         queueCreateInfos.push_back(queueCreateInfo);
     }
 
-    VkPhysicalDeviceFeatures deviceFeatures{};
+    VkPhysicalDeviceFeatures deviceFeatures = {};
+    deviceFeatures.samplerAnisotropy = VK_TRUE;
 
     VkDeviceCreateInfo createInfo;
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -238,9 +248,9 @@ void Device::populateDebugMessengerInfo(VkDebugUtilsMessengerCreateInfoEXT& crea
 {
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 
-    createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
-                                 VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-                                 VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+    createInfo.messageSeverity =
+        VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+        VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 
     createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
                              VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
@@ -295,7 +305,12 @@ int Device::checkPhysicalDevice(const VkPhysicalDevice& device)
     vkGetPhysicalDeviceProperties(device, &deviceProperties);
 
     VkPhysicalDeviceFeatures deviceFeatures;
-    vkGetPhysicalDeviceFeatures(device, &deviceFeatures); // TODO: Check these if needed
+    vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+    if (!deviceFeatures.samplerAnisotropy)
+    {
+        return 0;
+    }
 
     int score = 0;
 

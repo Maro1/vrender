@@ -3,6 +3,7 @@
 #include "app/app.hpp"
 #include "core/graphics_context.hpp"
 #include "core/rendering/render_system.hpp"
+#include "core/vulkan/texture.hpp"
 #include "scene/model/mesh.hpp"
 #include "utils/log.hpp"
 
@@ -36,6 +37,8 @@ int VRender::run()
     }
 
     world()->addSystem<MeshRenderSystem>(device(), swapChain(), window(), world());
+
+    Texture texture(device(), "../assets/texture.jpg");
 
     while (!GraphicsContext::get().window()->shouldClose())
     {
