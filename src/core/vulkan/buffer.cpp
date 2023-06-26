@@ -42,7 +42,6 @@ bool Buffer::createBuffer(const BufferInfo& bufferInfo, VkBuffer& buffer, Memory
     VkMemoryRequirements memoryRequirements;
     vkGetBufferMemoryRequirements(m_Device->device(), buffer, &memoryRequirements);
 
-    VkMemoryAllocateInfo allocInfo = {};
     uint32_t typeIndex;
     if (!DeviceMemoryAllocator::findMemoryType(m_Device->physicalDevice(), memoryRequirements.memoryTypeBits,
                                                bufferInfo.memoryProperties, typeIndex))
@@ -50,11 +49,8 @@ bool Buffer::createBuffer(const BufferInfo& bufferInfo, VkBuffer& buffer, Memory
         V_LOG_ERROR("Failed to find required memory for buffer.");
         return false;
     }
-    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocInfo.memoryTypeIndex = typeIndex;
-    allocInfo.allocationSize = memoryRequirements.size;
-
-    GraphicsContext::get().deviceMemoryAllocator()->allocate(memoryRequirements.size, typeIndex, memory);
+    GraphicsContext::get().deviceMemoryAllocator()->allocate(memoryRequirements.size, memoryRequirements.alignment,
+                                                             typeIndex, memory);
 
     vkBindBufferMemory(m_Device->device(), buffer, memory.memory, memory.offset);
 

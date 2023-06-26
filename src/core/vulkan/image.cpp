@@ -119,12 +119,8 @@ bool Image::createImage(const ImageInfo& imageInfo, VkImage& image, MemoryBlock&
         return false;
     }
 
-    VkMemoryAllocateInfo allocInfo = {};
-    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocInfo.allocationSize = memoryRequirements.size;
-    allocInfo.memoryTypeIndex = typeIndex;
-
-    GraphicsContext::get().deviceMemoryAllocator()->allocate(memoryRequirements.size, typeIndex, m_Memory);
+    GraphicsContext::get().deviceMemoryAllocator()->allocate(memoryRequirements.size, memoryRequirements.alignment,
+                                                             typeIndex, m_Memory);
 
     vkBindImageMemory(m_Device->device(), m_Image, m_Memory.memory, 0);
 
@@ -132,7 +128,8 @@ bool Image::createImage(const ImageInfo& imageInfo, VkImage& image, MemoryBlock&
 }
 
 // ImageView
-ImageView::ImageView(Device* device, const Image& image, VkImageAspectFlags aspectFlags, VkFormat format) : m_Device(device)
+ImageView::ImageView(Device* device, const Image& image, VkImageAspectFlags aspectFlags, VkFormat format)
+    : m_Device(device)
 {
     VkImageViewCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;

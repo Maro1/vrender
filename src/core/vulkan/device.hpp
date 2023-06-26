@@ -2,6 +2,7 @@
 
 #include <optional>
 #include <vector>
+#include <vulkan/vulkan_core.h>
 
 #define GLFW_INCLUDE_VULKAN
 #include "GLFW/glfw3.h"
@@ -19,7 +20,7 @@ struct QueueFamilyIndices
     std::optional<uint32_t> graphicsFamily;
     std::optional<uint32_t> presentFamily;
 
-    inline bool isComplete() { return graphicsFamily.has_value() && graphicsFamily.has_value(); }
+    inline bool isComplete() { return graphicsFamily.has_value() && presentFamily.has_value(); }
 };
 
 struct SwapChainSupportDetails
@@ -93,6 +94,7 @@ private:
     VkDebugUtilsMessengerEXT m_DebugMessenger;
 
     const std::vector<const char*> m_ValidationLayers = {"VK_LAYER_KHRONOS_validation"};
-    const std::vector<const char*> m_DeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+    const std::vector<const char*> m_DeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+                                                         VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME};
 };
 }; // namespace vrender

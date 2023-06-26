@@ -34,7 +34,7 @@ public:
     MemoryAllocation(Device* device, VkDeviceSize size, uint32_t memoryTypeIndex);
     ~MemoryAllocation();
 
-    bool allocateBlock(VkDeviceSize size, MemoryBlock& block);
+    bool allocateBlock(VkDeviceSize size, VkDeviceSize alignment, MemoryBlock& block);
     bool freeBlock(const MemoryBlock& block);
 
     inline uint32_t memoryTypeIndex() const { return m_MemoryTypeIndex; }
@@ -69,7 +69,7 @@ public:
     DeviceMemoryAllocator(Device* device, VkDeviceSize size);
     ~DeviceMemoryAllocator();
 
-    bool allocate(VkDeviceSize size, uint32_t memoryTypeIndex, MemoryBlock& block);
+    bool allocate(VkDeviceSize size, VkDeviceSize allignment, uint32_t memoryTypeIndex, MemoryBlock& block);
     void free(const MemoryBlock& block);
 
     static bool findMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags flags,

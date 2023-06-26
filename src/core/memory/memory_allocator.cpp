@@ -1,5 +1,6 @@
 #include "memory_allocator.hpp"
 #include "utils/log.hpp"
+#include <vulkan/vulkan_core.h>
 
 namespace vrender
 {
@@ -48,7 +49,7 @@ bool MemoryAllocation::freeBlock(const MemoryBlock& block)
     return true;
 }
 
-bool MemoryAllocation::allocateBlock(VkDeviceSize size, MemoryBlock& rblock)
+bool MemoryAllocation::allocateBlock(VkDeviceSize size, VkDeviceSize alignment, MemoryBlock& rblock)
 {
     if (size > m_Size)
         return false;
@@ -57,6 +58,18 @@ bool MemoryAllocation::allocateBlock(VkDeviceSize size, MemoryBlock& rblock)
     {
         if (m_Blocks[i].free)
         {
+            if (m_Blocks[i].offset % alignment != 0)
+            {
+                VkDeviceSize padding = (alignment - (m_Blocks[i].offset % alignment));
+                VkDeviceSize requiredSize = size + padding;
+                if (m_Blocks[i].size < requiredSize)
+                {
+                    continue;
+                }
+                VkDeviceSize newOffset = m_Blocks[i].offset + padding;
+                m_Blocks[i].offset = newOffset;
+                m_Blocks[i].size -= padding;
+            }
             if (m_Blocks[i].size == size)
             {
                 // Found block of same size, allocate it
@@ -191,12 +204,14 @@ MemoryAllocation* DeviceMemoryAllocator::findSuitableAllocation(VkDeviceSize siz
     return allocation;
 }
 
-bool DeviceMemoryAllocator::allocate(VkDeviceSize size, uint32_t memoryTypeIndex, MemoryBlock& block)
+bool DeviceMemoryAllocator::allocate(VkDeviceSize size, VkDeviceSize alignment, uint32_t memoryTypeIndex,
+                                     MemoryBlock& block)
 {
     VkDeviceSize requestSize = ((size / m_PageSize) + 1) * m_PageSize;
+
     MemoryAllocation* suitableAllocation = findSuitableAllocation(requestSize, memoryTypeIndex);
 
-    return suitableAllocation->allocateBlock(requestSize, block);
+    return suitableAllocation->allocateBlock(requestSize, alignment, block);
 }
 
 void DeviceMemoryAllocator::free(const MemoryBlock& block)

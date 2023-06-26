@@ -1,10 +1,13 @@
 #include "render_system.hpp"
 
 #include "core/vulkan/descriptor_set.hpp"
+
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include "glm/detail/qualifier.hpp"
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/fwd.hpp"
 #include "scene/model/mesh.hpp"
+#include "utils/log.hpp"
 #include <vulkan/vulkan_core.h>
 
 namespace vrender
@@ -91,6 +94,7 @@ void MeshRenderSystem::update()
             glm::mat4 view = m_Scene->camera()->view();
             glm::mat4 projView = m_Scene->camera()->projection() * m_Scene->camera()->view();
             GlobalUBO ubo = {projView};
+
             m_GlobalUniformHandler.buffer()->copyData((void*)&ubo, sizeof(GlobalUBO));
 
             vkCmdPushConstants(commandBuffer, m_Renderer.pipeline().layout(), VK_SHADER_STAGE_VERTEX_BIT, 0,
