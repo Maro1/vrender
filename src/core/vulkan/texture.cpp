@@ -11,10 +11,10 @@
 namespace vrender
 {
 
-Texture::Texture(Device* device, const std::string& filepath) : m_Device(device)
+Texture::Texture(const std::string& filepath) : m_Device(GraphicsContext::get().device())
 {
     createTextureImage(filepath);
-    m_ImageView = std::make_unique<ImageView>(device, *m_Image, VK_IMAGE_ASPECT_COLOR_BIT, VK_FORMAT_R8G8B8A8_SRGB);
+    m_ImageView = std::make_unique<ImageView>(m_Device, *m_Image, VK_IMAGE_ASPECT_COLOR_BIT, VK_FORMAT_R8G8B8A8_SRGB);
     createSampler();
 }
 

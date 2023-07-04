@@ -11,6 +11,7 @@
 #include "utils/noncopyable.hpp"
 
 #include <memory>
+#include <utility>
 
 namespace vrender
 {
@@ -24,22 +25,19 @@ struct AppInfo
 
 class App : private NonCopyable
 {
+    friend class Engine;
+
 public:
-    App(const AppInfo& appInfo) { GraphicsContext::get().init(appInfo); }
+    App(const AppInfo& appInfo) : m_AppInfo(appInfo) {}
 
-    virtual int run() = 0;
+    virtual void init() = 0;
+    virtual void update(double deltaTime) = 0;
+    virtual void terminate() = 0;
 
-protected:
-    inline Device* device() const { return GraphicsContext::get().device(); }
-    inline Renderer* renderer() const { return GraphicsContext::get().renderer(); }
-    inline Window* window() const { return GraphicsContext::get().window(); }
-    inline SwapChain* swapChain() const { return GraphicsContext::get().swapChain(); }
-    inline DeviceMemoryAllocator* deviceMemoryAllocator() const
-    {
-        return GraphicsContext::get().deviceMemoryAllocator();
-    }
-    inline Scene* world() const { return GraphicsContext::get().world(); }
+    inline AppInfo info() const { return m_AppInfo; }
 
 private:
+    AppInfo m_AppInfo;
+    bool started = false;
 };
 } // namespace vrender

@@ -36,7 +36,7 @@ public:
 class MeshRenderSystem : public System
 {
 public:
-    MeshRenderSystem(Device* device, SwapChain* swapChain, Window* window, Scene* scene);
+    MeshRenderSystem();
 
     virtual void start() override;
     virtual void update() override;
