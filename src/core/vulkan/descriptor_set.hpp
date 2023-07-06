@@ -13,7 +13,7 @@ class Pipeline;
 class DescriptorPool : private NonCopyable
 {
 public:
-    DescriptorPool(Device* device, DescriptorSetAllocator* allocator, std::vector<VkDescriptorType> descriptorTypes,
+    DescriptorPool(DescriptorSetAllocator* allocator, std::vector<VkDescriptorType> descriptorTypes,
                    unsigned int descriptorCount);
     ~DescriptorPool();
 
@@ -26,7 +26,6 @@ private:
 
     VkDescriptorPool m_Pool;
 
-    Device* m_Device;
     DescriptorSetAllocator* m_Allocator;
 
     std::vector<VkDescriptorSet> m_DescriptorSets;
@@ -43,8 +42,6 @@ public:
     std::vector<VkDescriptorSet> allocate(VkDescriptorPool pool, unsigned int count) const;
 
 private:
-    Device* m_Device;
-
     VkDescriptorSetLayout m_Layout;
 };
 }; // namespace vrender

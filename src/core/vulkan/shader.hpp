@@ -11,7 +11,7 @@ namespace vrender
 class Shader
 {
 public:
-    Shader(Device* device, const std::string& vertexPath, const std::string& fragmentPath);
+    Shader(const std::string& vertexPath, const std::string& fragmentPath);
     ~Shader();
 
     inline VkShaderModule vertexModule() const { return m_VertModule; }
@@ -26,7 +26,6 @@ private:
 
     VkShaderModule m_VertModule;
     VkShaderModule m_FragModule;
-    Device* m_Device;
 };
 
 }; // namespace vrender

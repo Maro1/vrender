@@ -18,8 +18,8 @@ MeshRenderSystem::MeshRenderSystem()
       m_Renderer(GraphicsContext::get().device(), GraphicsContext::get().swapChain(), GraphicsContext::get().window()),
       m_DescriptorAllocator(GraphicsContext::get().device(), &m_Renderer.pipeline()),
       m_GlobalUniformHandler(sizeof(GlobalUBO)),
-      m_DescriptorPool(GraphicsContext::get().device(), &m_DescriptorAllocator, DESCRIPTOR_TYPES, FRAME_OVERLAP),
-      m_Texture("../assets/texture.jpg")
+      m_DescriptorPool(&m_DescriptorAllocator, DESCRIPTOR_TYPES, FRAME_OVERLAP),
+      m_Texture("../assets/models/Stool_Albedo.png")
 {
     for (uint32_t i = 0; i < FRAME_OVERLAP; i++)
     {
@@ -86,7 +86,7 @@ void MeshRenderSystem::update()
             glm::mat4 model(1.0f);
             model = glm::translate(model, transform->position);
             model = glm::scale(model, transform->scale);
-            //! model *= transform->rotation;
+            model *= glm::toMat4(transform->rotation);
 
             PushData pushData = {model};
 

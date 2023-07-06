@@ -2,11 +2,7 @@
 
 #include "app/window.hpp"
 
-#include "core/graphics_context.hpp"
-#include "core/memory/memory_allocator.hpp"
-#include "core/rendering/renderer.hpp"
-#include "core/vulkan/device.hpp"
-#include "core/vulkan/swap_chain.hpp"
+#include "scene/scene.hpp"
 
 #include "utils/noncopyable.hpp"
 
@@ -29,12 +25,17 @@ class App : private NonCopyable
 
 public:
     App(const AppInfo& appInfo) : m_AppInfo(appInfo) {}
+    virtual ~App() = default;
 
     virtual void init() = 0;
     virtual void update(double deltaTime) = 0;
     virtual void terminate() = 0;
 
     inline AppInfo info() const { return m_AppInfo; }
+
+protected:
+
+    Scene* world() const;
 
 private:
     AppInfo m_AppInfo;

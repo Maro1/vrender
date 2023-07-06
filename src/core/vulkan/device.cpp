@@ -95,7 +95,10 @@ int Device::createVulkanInstance(const AppInfo& appInfo)
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     createInfo.pApplicationInfo = &vulkanAppInfo;
     createInfo.pNext = NULL;
-    createInfo.flags = 0;
+
+#ifdef __APPLE__
+    createInfo.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+#endif
 
     std::vector<const char*> extensions = getExtensions();
     createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
@@ -194,6 +197,10 @@ std::vector<const char*> Device::getExtensions()
 
 #ifndef NDEBUG
     extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+#endif
+
+#ifdef __APPLE__
+    extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
 #endif
 
     uint32_t extensionCount = 0;

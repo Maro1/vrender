@@ -1,4 +1,7 @@
 #include "shader.hpp"
+
+#include "core/graphics_context.hpp"
+
 #include "utils/log.hpp"
 
 #include <cstddef>
@@ -8,7 +11,7 @@
 namespace vrender
 {
 
-Shader::Shader(Device* device, const std::string& vertexPath, const std::string& fragmentPath) : m_Device(device)
+Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath)
 {
     m_VertexData = Shader::readFile(vertexPath);
     m_FragmentData = Shader::readFile(fragmentPath);
@@ -18,8 +21,8 @@ Shader::Shader(Device* device, const std::string& vertexPath, const std::string&
 
 Shader::~Shader()
 {
-    vkDestroyShaderModule(m_Device->device(), m_VertModule, nullptr);
-    vkDestroyShaderModule(m_Device->device(), m_FragModule, nullptr);
+    vkDestroyShaderModule(GraphicsContext::get().device()->device(), m_VertModule, nullptr);
+    vkDestroyShaderModule(GraphicsContext::get().device()->device(), m_FragModule, nullptr);
 }
 
 std::vector<char> Shader::readFile(const std::string& filename)
@@ -50,7 +53,7 @@ VkShaderModule Shader::createShaderModule(const std::vector<char>& code)
     createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
     VkShaderModule shaderModule;
-    if (vkCreateShaderModule(m_Device->device(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
+    if (vkCreateShaderModule(GraphicsContext::get().device()->device(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
     {
         return VK_NULL_HANDLE;
     }

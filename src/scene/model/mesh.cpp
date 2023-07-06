@@ -11,7 +11,7 @@ namespace vrender
 
 // NOTE: Careful with passing vertices and indices like this to vertex buffer, who deletes?
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint16_t> indices)
-    : m_VertexBuffer(GraphicsContext::get().device(), vertices, indices)
+    : m_VertexBuffer(vertices, indices)
 {
 }
 

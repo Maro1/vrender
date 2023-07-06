@@ -14,7 +14,7 @@ namespace vrender
 Texture::Texture(const std::string& filepath) : m_Device(GraphicsContext::get().device())
 {
     createTextureImage(filepath);
-    m_ImageView = std::make_unique<ImageView>(m_Device, *m_Image, VK_IMAGE_ASPECT_COLOR_BIT, VK_FORMAT_R8G8B8A8_SRGB);
+    m_ImageView = std::make_unique<ImageView>(*m_Image, VK_IMAGE_ASPECT_COLOR_BIT, VK_FORMAT_R8G8B8A8_SRGB);
     createSampler();
 }
 
@@ -47,7 +47,7 @@ bool Texture::createTextureImage(const std::string& filepath)
     imageInfo.width = static_cast<uint32_t>(width);
     imageInfo.height = static_cast<uint32_t>(height);
 
-    m_Image = std::make_unique<Image>(m_Device, imageInfo);
+    m_Image = std::make_unique<Image>(imageInfo);
     m_Image->transitionLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
     m_Image->copyBufferToImage(buffer.buffer());
     m_Image->transitionLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,

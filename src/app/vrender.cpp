@@ -17,23 +17,27 @@ void VRender::init()
                                                      {EventType::KeyPress, EventType::KeyRelease, EventType::MouseMove,
                                                       EventType::MouseButtonPress, EventType::MouseButtonRelease,
                                                       EventType::InputState});
-    for (uint32_t i = 0; i < 10; i++)
-    {
-        Entity* entity = Engine::get().world()->createEntity();
+    Entity* entity = world()->createEntity();
 
-        entity->addComponent<Mesh>("../assets/models/cube.obj");
-        entity->addComponent<Transform>();
+    entity->addComponent<Mesh>("../assets/models/stool.obj");
+    entity->addComponent<Transform>();
 
-        entity->getComponent<Transform>()->position = glm::vec3(i * 1.0f, 0.0f, 0.0f);
-        entity->getComponent<Transform>()->scale = glm::vec3(0.1f);
-    }
+    entity->getComponent<Transform>()->position = glm::vec3(0.0f, 0.0f, 0.0f);
+    entity->getComponent<Transform>()->scale = glm::vec3(1.1f);
 
-    Engine::get().world()->addSystem<MeshRenderSystem>();
+    world()->addSystem<MeshRenderSystem>();
 
-    Texture texture("../assets/texture.jpg");
+    Texture texture("../assets/models/Stool_Albedo.png");
 }
 
-void VRender::update(double deltaTime) {}
+void VRender::update(double deltaTime) {
+    for (auto e : world()->entities())
+    {
+        if (e->hasComponent<Transform>()) {
+            //e->getComponent<Transform>()->rotation = glm::rotate(e->getComponent<Transform>()->rotation, glm::vec3(10 * deltaTime, 0, 0));
+        }
+    }
+}
 
 void VRender::terminate() {}
 

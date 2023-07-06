@@ -1,22 +1,23 @@
 #include "command_buffer.hpp"
-#include <vulkan/vulkan_core.h>
+
+#include "core/graphics_context.hpp"
 
 namespace vrender
 {
-CommandBuffer::CommandBuffer(Device* device) : m_Device(device)
+CommandBuffer::CommandBuffer()
 {
     VkCommandBufferAllocateInfo allocInfo = {};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = 1;
-    allocInfo.commandPool = m_Device->commandPool();
+    allocInfo.commandPool = GraphicsContext::get().device()->commandPool();
 
-    vkAllocateCommandBuffers(m_Device->device(), &allocInfo, &m_CommandBuffer);
+    vkAllocateCommandBuffers(GraphicsContext::get().device()->device(), &allocInfo, &m_CommandBuffer);
 }
 
 CommandBuffer::~CommandBuffer()
 {
-    vkFreeCommandBuffers(m_Device->device(), m_Device->commandPool(), 1, &m_CommandBuffer);
+    vkFreeCommandBuffers(GraphicsContext::get().device()->device(), GraphicsContext::get().device()->commandPool(), 1, &m_CommandBuffer);
 }
 
 void CommandBuffer::begin(VkCommandBufferUsageFlags flags)
@@ -37,8 +38,8 @@ void CommandBuffer::submit_wait()
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &m_CommandBuffer;
 
-    vkQueueSubmit(m_Device->graphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
-    vkQueueWaitIdle(m_Device->graphicsQueue());
+    vkQueueSubmit(GraphicsContext::get().device()->graphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(GraphicsContext::get().device()->graphicsQueue());
 }
 
 void CommandBuffer::submit()
@@ -50,6 +51,6 @@ void CommandBuffer::submit()
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &m_CommandBuffer;
 
-    vkQueueSubmit(m_Device->graphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueSubmit(GraphicsContext::get().device()->graphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
 }
 } // namespace vrender
