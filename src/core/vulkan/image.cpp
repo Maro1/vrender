@@ -7,21 +7,21 @@
 namespace vrender
 {
 
-Image::Image(Device* device, const ImageInfo& imageInfo) : m_Device(device), m_Info(imageInfo)
+Image::Image(const ImageInfo& imageInfo) : m_Info(imageInfo)
 {
     createImage(imageInfo, m_Image, m_Memory);
 }
 
 Image::~Image()
 {
-    vkDestroyImage(m_Device->device(), m_Image, nullptr);
+    vkDestroyImage(GraphicsContext::get().device()->device(), m_Image, nullptr);
 
     GraphicsContext::get().deviceMemoryAllocator()->free(m_Memory);
 }
 
 void Image::transitionLayout(VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
 {
-    CommandBuffer cmdBuffer(m_Device);
+    CommandBuffer cmdBuffer;
     cmdBuffer.begin(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
     VkImageMemoryBarrier barrier = {};
@@ -68,7 +68,7 @@ void Image::transitionLayout(VkFormat format, VkImageLayout oldLayout, VkImageLa
 
 void Image::copyBufferToImage(VkBuffer buffer)
 {
-    CommandBuffer cmdBuffer(m_Device);
+    CommandBuffer cmdBuffer;
     cmdBuffer.begin(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
     VkBufferImageCopy region = {};
@@ -106,13 +106,13 @@ bool Image::createImage(const ImageInfo& imageInfo, VkImage& image, MemoryBlock&
     imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 
-    vkCreateImage(m_Device->device(), &imageCreateInfo, nullptr, &m_Image);
+    vkCreateImage(GraphicsContext::get().device()->device(), &imageCreateInfo, nullptr, &m_Image);
 
     VkMemoryRequirements memoryRequirements;
-    vkGetImageMemoryRequirements(m_Device->device(), m_Image, &memoryRequirements);
+    vkGetImageMemoryRequirements(GraphicsContext::get().device()->device(), m_Image, &memoryRequirements);
 
     uint32_t typeIndex;
-    if (!DeviceMemoryAllocator::findMemoryType(m_Device->physicalDevice(), memoryRequirements.memoryTypeBits,
+    if (!DeviceMemoryAllocator::findMemoryType(GraphicsContext::get().device()->physicalDevice(), memoryRequirements.memoryTypeBits,
                                                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, typeIndex))
     {
         V_LOG_ERROR("Failed to find required memory for texture.");
@@ -122,14 +122,13 @@ bool Image::createImage(const ImageInfo& imageInfo, VkImage& image, MemoryBlock&
     GraphicsContext::get().deviceMemoryAllocator()->allocate(memoryRequirements.size, memoryRequirements.alignment,
                                                              typeIndex, m_Memory);
 
-    vkBindImageMemory(m_Device->device(), m_Image, m_Memory.memory, 0);
+    vkBindImageMemory(GraphicsContext::get().device()->device(), m_Image, m_Memory.memory, 0);
 
     return true;
 }
 
 // ImageView
-ImageView::ImageView(Device* device, const Image& image, VkImageAspectFlags aspectFlags, VkFormat format)
-    : m_Device(device)
+ImageView::ImageView(const Image& image, VkImageAspectFlags aspectFlags, VkFormat format)
 {
     VkImageViewCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -142,12 +141,12 @@ ImageView::ImageView(Device* device, const Image& image, VkImageAspectFlags aspe
     createInfo.subresourceRange.baseArrayLayer = 0;
     createInfo.subresourceRange.layerCount = 1;
 
-    vkCreateImageView(device->device(), &createInfo, nullptr, &m_ImageView);
+    vkCreateImageView(GraphicsContext::get().device()->device(), &createInfo, nullptr, &m_ImageView);
 }
 
 ImageView::~ImageView()
 {
-    vkDestroyImageView(m_Device->device(), m_ImageView, nullptr);
+    vkDestroyImageView(GraphicsContext::get().device()->device(), m_ImageView, nullptr);
 }
 
 } // namespace vrender

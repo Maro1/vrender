@@ -8,7 +8,7 @@ namespace vrender
 class CommandBuffer
 {
 public:
-    CommandBuffer(Device* device);
+    CommandBuffer();
     ~CommandBuffer();
 
     inline const VkCommandBuffer buffer() { return m_CommandBuffer; }
@@ -19,6 +19,5 @@ public:
 
 private:
     VkCommandBuffer m_CommandBuffer;
-    Device* m_Device;
 };
 } // namespace vrender

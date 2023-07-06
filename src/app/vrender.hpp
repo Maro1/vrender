@@ -15,7 +15,9 @@ public:
     VRender();
     ~VRender();
 
-    virtual int run() override;
+    virtual void init() override;
+    virtual void update(double deltaTime) override;
+    virtual void terminate() override;
 
 private:
     inline static const AppInfo sAppInfo = {"VRender", 1, 2};

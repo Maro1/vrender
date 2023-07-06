@@ -2,15 +2,12 @@
 
 #include "app/window.hpp"
 
-#include "core/graphics_context.hpp"
-#include "core/memory/memory_allocator.hpp"
-#include "core/rendering/renderer.hpp"
-#include "core/vulkan/device.hpp"
-#include "core/vulkan/swap_chain.hpp"
+#include "scene/scene.hpp"
 
 #include "utils/noncopyable.hpp"
 
 #include <memory>
+#include <utility>
 
 namespace vrender
 {
@@ -24,22 +21,24 @@ struct AppInfo
 
 class App : private NonCopyable
 {
-public:
-    App(const AppInfo& appInfo) { GraphicsContext::get().init(appInfo); }
+    friend class Engine;
 
-    virtual int run() = 0;
+public:
+    App(const AppInfo& appInfo) : m_AppInfo(appInfo) {}
+    virtual ~App() = default;
+
+    virtual void init() = 0;
+    virtual void update(double deltaTime) = 0;
+    virtual void terminate() = 0;
+
+    inline AppInfo info() const { return m_AppInfo; }
 
 protected:
-    inline Device* device() const { return GraphicsContext::get().device(); }
-    inline Renderer* renderer() const { return GraphicsContext::get().renderer(); }
-    inline Window* window() const { return GraphicsContext::get().window(); }
-    inline SwapChain* swapChain() const { return GraphicsContext::get().swapChain(); }
-    inline DeviceMemoryAllocator* deviceMemoryAllocator() const
-    {
-        return GraphicsContext::get().deviceMemoryAllocator();
-    }
-    inline Scene* world() const { return GraphicsContext::get().world(); }
+
+    Scene* world() const;
 
 private:
+    AppInfo m_AppInfo;
+    bool started = false;
 };
 } // namespace vrender

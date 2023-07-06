@@ -13,7 +13,7 @@ namespace vrender
 {
 
 Renderer::Renderer(Device* device, SwapChain* swapChain, Window* window)
-    : m_Device(device), m_SwapChain(swapChain), m_Window(window), m_Pipeline(device, swapChain)
+    : m_Device(device), m_SwapChain(swapChain), m_Window(window), m_Pipeline()
 {
     init();
 }

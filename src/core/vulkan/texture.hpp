@@ -14,7 +14,7 @@ namespace vrender
 class Texture
 {
 public:
-    Texture(Device* device, const std::string& filepath);
+    Texture(const std::string& filepath);
     ~Texture();
 
     inline VkImageView imageView() const { return m_ImageView->imageView(); }

@@ -14,9 +14,9 @@ namespace vrender
 
 SwapChain::SwapChain(Device* device, Window* window)
     : m_Window(window), m_Device(device),
-      m_DepthImage(std::make_unique<Image>(device, ImageInfo{VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL,
+      m_DepthImage(std::make_unique<Image>(ImageInfo{VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL,
                             window->extent().width, window->extent().height})),
-      m_DepthImageView(std::make_unique<ImageView>(device, *m_DepthImage, VK_IMAGE_ASPECT_DEPTH_BIT, VK_FORMAT_D32_SFLOAT))
+      m_DepthImageView(std::make_unique<ImageView>(*m_DepthImage, VK_IMAGE_ASPECT_DEPTH_BIT, VK_FORMAT_D32_SFLOAT))
 {
     init();
 };
@@ -48,9 +48,9 @@ void SwapChain::recreate()
     cleanup();
 
     // TODO: Make depth images part of m_SwapChainImages?
-    m_DepthImage = std::make_unique<Image>(m_Device, ImageInfo{VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL,
+    m_DepthImage = std::make_unique<Image>(ImageInfo{VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL,
                             m_Window->extent().width, m_Window->extent().height});
-    m_DepthImageView = std::make_unique<ImageView>(m_Device, *m_DepthImage, VK_IMAGE_ASPECT_DEPTH_BIT, VK_FORMAT_D32_SFLOAT);
+    m_DepthImageView = std::make_unique<ImageView>(*m_DepthImage, VK_IMAGE_ASPECT_DEPTH_BIT, VK_FORMAT_D32_SFLOAT);
     createSwapChain();
     createImageViews();
     createRenderPass();

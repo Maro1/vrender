@@ -7,14 +7,14 @@ set(BINARY_NAME vrender)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-if(UNIX)
+if(LINUX)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
 
     include_directories(${GTK3_INCLUDE_DIRS})
     link_directories(${GTK3_LIBRARY_DIRS})
     add_definitions(${GTK3_CFLAGS_OTHER})
-endif(UNIX)
+endif(LINUX)
 
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 file(GLOB_RECURSE HEADERS "src/*.h")

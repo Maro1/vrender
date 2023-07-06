@@ -11,7 +11,7 @@ namespace vrender
 class Pipeline : private NonCopyable
 {
 public:
-    Pipeline(Device* device, SwapChain* swapChain);
+    Pipeline();
     ~Pipeline();
 
     void bind(const VkCommandBuffer& commandBuffer);
@@ -21,8 +21,6 @@ public:
 
 private:
     Shader m_Shader;
-    Device* m_Device;
-    SwapChain* m_SwapChain;
 
     VkDescriptorSetLayout m_DescriptorSetLayout;
 

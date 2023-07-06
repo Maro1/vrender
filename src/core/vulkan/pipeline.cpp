@@ -2,13 +2,12 @@
 
 #include "core/rendering/render_system.hpp"
 #include "core/vulkan/buffer.hpp"
-#include <vulkan/vulkan_core.h>
+#include "core/graphics_context.hpp"
 
 namespace vrender
 {
-Pipeline::Pipeline(Device* device, SwapChain* swapChain)
-    : m_Device(device), m_SwapChain(swapChain),
-      m_Shader(device, "shader_bin/triangle.vert.spv", "shader_bin/triangle.frag.spv")
+Pipeline::Pipeline()
+    : m_Shader("shader_bin/triangle.vert.spv", "shader_bin/triangle.frag.spv")
 {
     createGraphicsDescriptorLayout();
     createGraphicsPipeline();
@@ -16,9 +15,9 @@ Pipeline::Pipeline(Device* device, SwapChain* swapChain)
 
 Pipeline::~Pipeline()
 {
-    vkDestroyPipeline(m_Device->device(), m_Pipeline, nullptr);
-    vkDestroyPipelineLayout(m_Device->device(), m_Layout, nullptr);
-    vkDestroyDescriptorSetLayout(m_Device->device(), m_DescriptorSetLayout, nullptr);
+    vkDestroyPipeline(GraphicsContext::get().device()->device(), m_Pipeline, nullptr);
+    vkDestroyPipelineLayout(GraphicsContext::get().device()->device(), m_Layout, nullptr);
+    vkDestroyDescriptorSetLayout(GraphicsContext::get().device()->device(), m_DescriptorSetLayout, nullptr);
 }
 
 void Pipeline::bind(const VkCommandBuffer& commandBuffer)
@@ -61,14 +60,14 @@ bool Pipeline::createGraphicsPipeline()
     VkViewport viewport = {};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
-    viewport.width = (float)m_SwapChain->extent().width;
-    viewport.height = (float)m_SwapChain->extent().height;
+    viewport.width = (float)GraphicsContext::get().swapChain()->extent().width;
+    viewport.height = (float)GraphicsContext::get().swapChain()->extent().height;
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
 
     VkRect2D scissor = {};
     scissor.offset = {0, 0};
-    scissor.extent = m_SwapChain->extent();
+    scissor.extent = GraphicsContext::get().swapChain()->extent();
 
     VkPipelineViewportStateCreateInfo viewportStateInfo = {};
     viewportStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -133,7 +132,7 @@ bool Pipeline::createGraphicsPipeline()
     pipelineLayoutInfo.pushConstantRangeCount = 1;
     pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
-    VkResult layoutResult = vkCreatePipelineLayout(m_Device->device(), &pipelineLayoutInfo, nullptr, &m_Layout);
+    VkResult layoutResult = vkCreatePipelineLayout(GraphicsContext::get().device()->device(), &pipelineLayoutInfo, nullptr, &m_Layout);
 
     VkPipelineDynamicStateCreateInfo dynamicStateInfo = {};
     dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
@@ -166,13 +165,13 @@ bool Pipeline::createGraphicsPipeline()
 
     pipelineInfo.layout = m_Layout;
 
-    pipelineInfo.renderPass = m_SwapChain->renderPass();
+    pipelineInfo.renderPass = GraphicsContext::get().swapChain()->renderPass();
     pipelineInfo.subpass = 0;
 
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
     pipelineInfo.basePipelineIndex = -1;
 
-    return vkCreateGraphicsPipelines(m_Device->device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_Pipeline) ==
+    return vkCreateGraphicsPipelines(GraphicsContext::get().device()->device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_Pipeline) ==
            VK_SUCCESS;
 }
 
@@ -205,6 +204,6 @@ bool Pipeline::createGraphicsDescriptorLayout()
     layoutInfo.bindingCount = 3;
     layoutInfo.pBindings = bindings;
 
-    return vkCreateDescriptorSetLayout(m_Device->device(), &layoutInfo, nullptr, &m_DescriptorSetLayout) == VK_SUCCESS;
+    return vkCreateDescriptorSetLayout(GraphicsContext::get().device()->device(), &layoutInfo, nullptr, &m_DescriptorSetLayout) == VK_SUCCESS;
 }
 }; // namespace vrender

@@ -3,6 +3,7 @@
 #include "core/graphics_context.hpp"
 #include "events/key_events.hpp"
 #include "events/mouse_events.hpp"
+#include "utils/log.hpp"
 
 namespace vrender
 {
@@ -16,19 +17,10 @@ Window::Window(unsigned int width, unsigned int height, const std::string& title
 Window::~Window()
 {
     glfwDestroyWindow(m_WindowInstance);
-    glfwTerminate(); // TODO: Move this to app termination or something similar, shouldn't init/terminate glfw on every
-                     // new window?
 }
 
 void Window::init()
 {
-    // TODO: Move this to app init or something similar to avoid initializing multiple times
-    if (!glfwInit())
-    {
-        // TODO: Replace with proper error/logging system
-        perror("Could not init GLFW library.");
-    }
-
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
@@ -40,8 +32,7 @@ void Window::init()
 
     if (!m_WindowInstance)
     {
-        // TODO: Replace with proper error/logging system
-        perror("Could not create window.");
+        V_LOG_ERROR("Could not create window.");
     }
 }
 

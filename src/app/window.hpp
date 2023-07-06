@@ -74,7 +74,13 @@ private:
     double m_Time;
     std::bitset<NUM_KEYBOARD_KEYS> m_KeyStates;
 
+#ifdef __APPLE__
+    static constexpr unsigned int DEFAULT_WIDTH = 2880;
+    static constexpr unsigned int DEFAULT_HEIGHT = 1530;
+#else
     static constexpr unsigned int DEFAULT_WIDTH = 800;
     static constexpr unsigned int DEFAULT_HEIGHT = 600;
+
+#endif
 };
 }; // namespace vrender

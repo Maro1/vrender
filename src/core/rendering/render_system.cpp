@@ -1,5 +1,6 @@
 #include "render_system.hpp"
 
+#include "core/graphics_context.hpp"
 #include "core/vulkan/descriptor_set.hpp"
 
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -12,11 +13,13 @@
 
 namespace vrender
 {
-MeshRenderSystem::MeshRenderSystem(Device* device, SwapChain* swapChain, Window* window, Scene* scene)
-    : System(scene), m_Renderer(device, swapChain, window), m_DescriptorAllocator(device, &m_Renderer.pipeline()),
+MeshRenderSystem::MeshRenderSystem()
+    : System(GraphicsContext::get().world()),
+      m_Renderer(GraphicsContext::get().device(), GraphicsContext::get().swapChain(), GraphicsContext::get().window()),
+      m_DescriptorAllocator(GraphicsContext::get().device(), &m_Renderer.pipeline()),
       m_GlobalUniformHandler(sizeof(GlobalUBO)),
-      m_DescriptorPool(device, &m_DescriptorAllocator, DESCRIPTOR_TYPES, FRAME_OVERLAP),
-      m_Texture(device, "../assets/texture.jpg")
+      m_DescriptorPool(&m_DescriptorAllocator, DESCRIPTOR_TYPES, FRAME_OVERLAP),
+      m_Texture("../assets/models/Stool_Albedo.png")
 {
     for (uint32_t i = 0; i < FRAME_OVERLAP; i++)
     {
@@ -55,7 +58,7 @@ MeshRenderSystem::MeshRenderSystem(Device* device, SwapChain* swapChain, Window*
         descriptorWrites[2].descriptorCount = 1;
         descriptorWrites[2].pImageInfo = &imageInfo;
 
-        vkUpdateDescriptorSets(device->device(), 3, descriptorWrites.data(), 0, nullptr);
+        vkUpdateDescriptorSets(GraphicsContext::get().device()->device(), 3, descriptorWrites.data(), 0, nullptr);
     }
 }
 void MeshRenderSystem::start()
@@ -83,7 +86,7 @@ void MeshRenderSystem::update()
             glm::mat4 model(1.0f);
             model = glm::translate(model, transform->position);
             model = glm::scale(model, transform->scale);
-            //! model *= transform->rotation;
+            model *= glm::toMat4(transform->rotation);
 
             PushData pushData = {model};
 

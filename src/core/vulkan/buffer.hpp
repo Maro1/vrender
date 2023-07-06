@@ -61,10 +61,9 @@ public:
     inline const VkBuffer& buffer() const { return m_Buffer; }
 
 protected:
-    Buffer(Device* device) : m_Device(device) {}
-    bool createBuffer(const BufferInfo& bufferInfo, VkBuffer& buffer, MemoryBlock& memory);
+    Buffer() {}
 
-    Device* m_Device = nullptr;
+    bool createBuffer(const BufferInfo& bufferInfo, VkBuffer& buffer, MemoryBlock& memory);
 
     VkBuffer m_Buffer;
     MemoryBlock m_Memory;
@@ -74,7 +73,7 @@ protected:
 class VertexBuffer : public Buffer
 {
 public:
-    VertexBuffer(Device* device, std::vector<Vertex> vertices, std::vector<uint16_t> indices);
+    VertexBuffer(std::vector<Vertex> vertices, std::vector<uint16_t> indices);
     ~VertexBuffer();
 
     // TODO: Change if can bind multiple at a time

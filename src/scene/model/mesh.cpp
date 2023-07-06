@@ -10,13 +10,12 @@ namespace vrender
 {
 
 // NOTE: Careful with passing vertices and indices like this to vertex buffer, who deletes?
-Mesh::Mesh(Device* device, std::vector<Vertex> vertices, std::vector<uint16_t> indices)
-    : m_VertexBuffer(device, vertices, indices)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint16_t> indices)
+    : m_VertexBuffer(vertices, indices)
 {
 }
 
-Mesh::Mesh(Device* device, const std::string& filepath)
-    : Mesh(device, Mesh::loadFromFile(filepath).first, Mesh::loadFromFile(filepath).second)
+Mesh::Mesh(const std::string& filepath) : Mesh(Mesh::loadFromFile(filepath).first, Mesh::loadFromFile(filepath).second)
 {
 }
 

@@ -13,8 +13,8 @@ namespace vrender
 class Mesh : public Component
 {
 public:
-    Mesh(Device* device, std::vector<Vertex> vertices, std::vector<uint16_t> indices);
-    Mesh(Device* device, const std::string& filepath);
+    Mesh(std::vector<Vertex> vertices, std::vector<uint16_t> indices);
+    Mesh(const std::string& filepath);
     ~Mesh();
 
     inline VertexBuffer* vertexBuffer() { return &m_VertexBuffer; }

@@ -1,14 +1,14 @@
 #include "descriptor_set.hpp"
 
 #include "core/vulkan/pipeline.hpp"
-#include <vulkan/vulkan_core.h>
+#include "core/graphics_context.hpp"
 
 namespace vrender
 {
 
-DescriptorPool::DescriptorPool(Device* device, DescriptorSetAllocator* allocator,
+DescriptorPool::DescriptorPool(DescriptorSetAllocator* allocator,
                                std::vector<VkDescriptorType> descriptorTypes, unsigned int descriptorCount)
-    : m_Device(device), m_Allocator(allocator)
+    : m_Allocator(allocator)
 {
     createDescriptorPool(descriptorTypes, descriptorCount + 10);
     m_DescriptorSets = m_Allocator->allocate(m_Pool, descriptorCount);
@@ -16,7 +16,7 @@ DescriptorPool::DescriptorPool(Device* device, DescriptorSetAllocator* allocator
 
 DescriptorPool::~DescriptorPool()
 {
-    vkDestroyDescriptorPool(m_Device->device(), m_Pool, nullptr);
+    vkDestroyDescriptorPool(GraphicsContext::get().device()->device(), m_Pool, nullptr);
 }
 
 VkResult DescriptorPool::createDescriptorPool(std::vector<VkDescriptorType> types, unsigned int descriptorCount)
@@ -37,12 +37,12 @@ VkResult DescriptorPool::createDescriptorPool(std::vector<VkDescriptorType> type
     poolInfo.pPoolSizes = poolSizes.data();
     poolInfo.maxSets = static_cast<uint32_t>(descriptorCount);
 
-    return vkCreateDescriptorPool(m_Device->device(), &poolInfo, nullptr, &m_Pool);
+    return vkCreateDescriptorPool(GraphicsContext::get().device()->device(), &poolInfo, nullptr, &m_Pool);
 }
 
 // ----------- VDescriptorSetAllocator
 DescriptorSetAllocator::DescriptorSetAllocator(Device* device, Pipeline* pipeline)
-    : m_Device(device), m_Layout(pipeline->descriptorSetLayout())
+    : m_Layout(pipeline->descriptorSetLayout())
 {
 }
 
@@ -62,7 +62,7 @@ std::vector<VkDescriptorSet> DescriptorSetAllocator::allocate(VkDescriptorPool p
     allocInfo.descriptorSetCount = count;
     allocInfo.pSetLayouts = layouts.data();
 
-    VkResult result = vkAllocateDescriptorSets(m_Device->device(), &allocInfo, descriptorSets.data());
+    VkResult result = vkAllocateDescriptorSets(GraphicsContext::get().device()->device(), &allocInfo, descriptorSets.data());
     return descriptorSets;
 }
 

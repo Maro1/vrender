@@ -11,13 +11,12 @@ namespace vrender
 Buffer::Buffer(const BufferInfo& bufferInfo)
 {
     m_Size = bufferInfo.size;
-    m_Device = GraphicsContext::get().device();
     createBuffer(bufferInfo, m_Buffer, m_Memory);
 }
 
 Buffer::~Buffer()
 {
-    vkDestroyBuffer(m_Device->device(), m_Buffer, nullptr);
+    vkDestroyBuffer(GraphicsContext::get().device()->device(), m_Buffer, nullptr);
 
     GraphicsContext::get().deviceMemoryAllocator()->free(m_Memory);
 }
@@ -32,7 +31,7 @@ bool Buffer::createBuffer(const BufferInfo& bufferInfo, VkBuffer& buffer, Memory
     createInfo.size = bufferInfo.size;
     createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    VkResult result = vkCreateBuffer(m_Device->device(), &createInfo, nullptr, &buffer);
+    VkResult result = vkCreateBuffer(GraphicsContext::get().device()->device(), &createInfo, nullptr, &buffer);
     if (result != VK_SUCCESS)
     {
         V_LOG_ERROR("Unable to create vertex buffer.");
@@ -40,10 +39,10 @@ bool Buffer::createBuffer(const BufferInfo& bufferInfo, VkBuffer& buffer, Memory
     }
 
     VkMemoryRequirements memoryRequirements;
-    vkGetBufferMemoryRequirements(m_Device->device(), buffer, &memoryRequirements);
+    vkGetBufferMemoryRequirements(GraphicsContext::get().device()->device(), buffer, &memoryRequirements);
 
     uint32_t typeIndex;
-    if (!DeviceMemoryAllocator::findMemoryType(m_Device->physicalDevice(), memoryRequirements.memoryTypeBits,
+    if (!DeviceMemoryAllocator::findMemoryType(GraphicsContext::get().device()->physicalDevice(), memoryRequirements.memoryTypeBits,
                                                bufferInfo.memoryProperties, typeIndex))
     {
         V_LOG_ERROR("Failed to find required memory for buffer.");
@@ -52,7 +51,7 @@ bool Buffer::createBuffer(const BufferInfo& bufferInfo, VkBuffer& buffer, Memory
     GraphicsContext::get().deviceMemoryAllocator()->allocate(memoryRequirements.size, memoryRequirements.alignment,
                                                              typeIndex, memory);
 
-    vkBindBufferMemory(m_Device->device(), buffer, memory.memory, memory.offset);
+    vkBindBufferMemory(GraphicsContext::get().device()->device(), buffer, memory.memory, memory.offset);
 
     return true;
 }
@@ -60,15 +59,15 @@ bool Buffer::createBuffer(const BufferInfo& bufferInfo, VkBuffer& buffer, Memory
 void* Buffer::copyData(void* src, size_t size, size_t offset)
 {
     void* data;
-    vkMapMemory(m_Device->device(), m_Memory.memory, m_Memory.offset, size, 0, &data);
+    vkMapMemory(GraphicsContext::get().device()->device(), m_Memory.memory, m_Memory.offset, size, 0, &data);
     memcpy(data, src, size);
-    vkUnmapMemory(m_Device->device(), m_Memory.memory);
+    vkUnmapMemory(GraphicsContext::get().device()->device(), m_Memory.memory);
     return data;
 }
 
 // ----------- VertexBuffer --------------
-VertexBuffer::VertexBuffer(Device* device, std::vector<Vertex> vertices, std::vector<uint16_t> indices)
-    : Buffer(device), m_Vertices(vertices), m_Indices(indices)
+VertexBuffer::VertexBuffer(std::vector<Vertex> vertices, std::vector<uint16_t> indices)
+    : m_Vertices(vertices), m_Indices(indices)
 {
     createVertexBuffer();
     createIndexBuffer();
@@ -76,7 +75,7 @@ VertexBuffer::VertexBuffer(Device* device, std::vector<Vertex> vertices, std::ve
 
 VertexBuffer::~VertexBuffer()
 {
-    vkDestroyBuffer(m_Device->device(), m_IndexBuffer, nullptr);
+    vkDestroyBuffer(GraphicsContext::get().device()->device(), m_IndexBuffer, nullptr);
     GraphicsContext::get().deviceMemoryAllocator()->free(m_IndexMemory);
 }
 
@@ -90,9 +89,9 @@ void VertexBuffer::createVertexBuffer()
     createBuffer(bufferInfo, m_StagingBuffer, m_StagingMemory);
 
     void* data;
-    vkMapMemory(m_Device->device(), m_StagingMemory.memory, m_StagingMemory.offset, bufferInfo.size, 0, &data);
+    vkMapMemory(GraphicsContext::get().device()->device(), m_StagingMemory.memory, m_StagingMemory.offset, bufferInfo.size, 0, &data);
     memcpy(data, m_Vertices.data(), (size_t)bufferInfo.size);
-    vkUnmapMemory(m_Device->device(), m_StagingMemory.memory);
+    vkUnmapMemory(GraphicsContext::get().device()->device(), m_StagingMemory.memory);
 
     bufferInfo.size = m_Vertices.size() * sizeof(Vertex);
     bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
@@ -101,7 +100,7 @@ void VertexBuffer::createVertexBuffer()
     createBuffer(bufferInfo, m_Buffer, m_Memory);
     copyBuffer(m_Buffer, bufferInfo.size);
 
-    vkDestroyBuffer(m_Device->device(), m_StagingBuffer, nullptr);
+    vkDestroyBuffer(GraphicsContext::get().device()->device(), m_StagingBuffer, nullptr);
     GraphicsContext::get().deviceMemoryAllocator()->free(m_StagingMemory);
 }
 
@@ -115,9 +114,9 @@ void VertexBuffer::createIndexBuffer()
     createBuffer(bufferInfo, m_StagingBuffer, m_StagingMemory);
 
     void* data;
-    vkMapMemory(m_Device->device(), m_StagingMemory.memory, m_StagingMemory.offset, bufferInfo.size, 0, &data);
+    vkMapMemory(GraphicsContext::get().device()->device(), m_StagingMemory.memory, m_StagingMemory.offset, bufferInfo.size, 0, &data);
     memcpy(data, m_Indices.data(), (size_t)bufferInfo.size);
-    vkUnmapMemory(m_Device->device(), m_StagingMemory.memory);
+    vkUnmapMemory(GraphicsContext::get().device()->device(), m_StagingMemory.memory);
 
     bufferInfo.size = m_Indices.size() * sizeof(uint16_t);
     bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
@@ -126,13 +125,13 @@ void VertexBuffer::createIndexBuffer()
     createBuffer(bufferInfo, m_IndexBuffer, m_IndexMemory);
     copyBuffer(m_IndexBuffer, bufferInfo.size);
 
-    vkDestroyBuffer(m_Device->device(), m_StagingBuffer, nullptr);
+    vkDestroyBuffer(GraphicsContext::get().device()->device(), m_StagingBuffer, nullptr);
     GraphicsContext::get().deviceMemoryAllocator()->free(m_StagingMemory);
 }
 
 void VertexBuffer::copyBuffer(const VkBuffer& dstBuffer, VkDeviceSize size)
 {
-    CommandBuffer cmdBuffer(m_Device);
+    CommandBuffer cmdBuffer;
     cmdBuffer.begin(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
     VkBufferCopy copyRegion = {};
@@ -169,6 +168,6 @@ UniformBuffer::UniformBuffer(const BufferInfo& bufferInfo) : Buffer(bufferInfo)
     descriptorWrite.descriptorCount = 1;
     descriptorWrite.pBufferInfo = &vkBufferInfo;
 
-    vkUpdateDescriptorSets(m_Device->device(), 1, &descriptorWrite, 0, nullptr);
+    vkUpdateDescriptorSets(GraphicsContext::get().device()->device(), 1, &descriptorWrite, 0, nullptr);
 }
 }; // namespace vrender

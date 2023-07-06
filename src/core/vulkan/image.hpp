@@ -19,7 +19,7 @@ struct ImageInfo
 class Image : private NonCopyable
 {
 public:
-    Image(Device* device, const ImageInfo& bufferInfo);
+    Image(const ImageInfo& bufferInfo);
 
     ~Image();
 
@@ -31,8 +31,6 @@ public:
 protected:
     bool createImage(const ImageInfo& bufferInfo, VkImage& image, MemoryBlock& memory);
 
-    Device* m_Device;
-
     VkImage m_Image;
     MemoryBlock m_Memory;
     ImageInfo m_Info;
@@ -41,14 +39,13 @@ protected:
 class ImageView : private NonCopyable
 {
 public:
-    ImageView(Device* device, const Image& image, VkImageAspectFlags aspectFlags, VkFormat format);
+    ImageView(const Image& image, VkImageAspectFlags aspectFlags, VkFormat format);
 
     ~ImageView();
 
     inline const VkImageView& imageView() const { return m_ImageView; }
 
 private:
-    Device* m_Device;
     VkImageView m_ImageView;
 };
 
