@@ -2,6 +2,8 @@
 
 #include "device.hpp"
 
+#include <glslang/Public/ShaderLang.h>
+
 #include <string>
 #include <vector>
 
@@ -17,12 +19,11 @@ public:
     inline VkShaderModule vertexModule() const { return m_VertModule; }
     inline VkShaderModule fragmentModule() const { return m_FragModule; }
 
+    static std::string readFile(const std::string& path);
 private:
-    static std::vector<char> readFile(const std::string& filename);
-    VkShaderModule createShaderModule(const std::vector<char>& code);
+    VkShaderModule createShaderModule(const std::string& path);
 
-    std::vector<char> m_FragmentData;
-    std::vector<char> m_VertexData;
+    static TBuiltInResource shaderResources();
 
     VkShaderModule m_VertModule;
     VkShaderModule m_FragModule;

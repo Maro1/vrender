@@ -7,7 +7,7 @@
 namespace vrender
 {
 Pipeline::Pipeline()
-    : m_Shader("shader_bin/triangle.vert.spv", "shader_bin/triangle.frag.spv")
+    : m_Shader("shaders/triangle.vert", "shaders/triangle.frag")
 {
     createGraphicsDescriptorLayout();
     createGraphicsPipeline();
